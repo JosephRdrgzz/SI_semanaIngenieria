@@ -1,0 +1,45 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f5f5f5;
+    text-align: center;
+}
+
+#header {
+    background-color: #003366;
+    padding: 10px;
+}
+
+#header img {
+    max-width: 100%;
+    height: auto;
+}
+
+#cuerpo {
+    margin: 20px;
+}
+
+#titulo {
+    font-size: 24px;
+    font-weight: bold;
+    margin-top: 20px;
+}
+
+#contenido {
+    width: 60%;
+    margin: 0 auto;
+    text-align: justify;
+}
+
+a {
+    text-decoration: none;
+    color: #003366;
+    font-size: 18px;
+    margin: 10px;
+}
+
+#footer {
+    margin-top: 20px;
+    padding: 10px;
+    background-color: #ddd;
+}
+
