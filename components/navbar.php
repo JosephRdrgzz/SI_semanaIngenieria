@@ -12,6 +12,10 @@
     <?php else: ?>
         <a href="index.php?view=login"> INICIAR SESIÓN </a>
     <?php endif; ?>
+    <!-- Mostrar Panel de Administración solo si el usuario es admin -->
+    <?php if ($_SESSION['tipo_usuario'] === 'admin'): ?>
+        <a href="index.php?view=panel_admin">Panel de Administración</a>
+    <?php endif; ?>
     <pre><?php //var_dump($_SESSION); ?></pre>
 
 </div>

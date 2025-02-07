@@ -1,6 +1,6 @@
 <?php
 session_start();
-require_once __DIR__ . '/config/conexion.php'; // Conexión a la base de datos
+require_once __DIR__ . '/config/conexion.php';
 
 // Cerrar sesión si se accede a "logout"
 if (isset($_GET['action']) && $_GET['action'] === 'logout') {
@@ -16,32 +16,44 @@ $view = isset($_GET['view']) ? $_GET['view'] : 'home';
 require __DIR__ . '/components/header.php';
 require __DIR__ . '/components/navbar.php';
 
-// Evitar doble inclusión de home.php
-if (!isset($alreadyLoaded)) {
-    $alreadyLoaded = true;
-
-    switch ($view) {
-        case 'eventos':
-            if (!isset($_SESSION['id_usuario'])) {
-                require 'views/login.php';
-            } else {
-                require 'views/eventos.php';
-            }
-            break;
-
-        case 'login':
+switch ($view) {
+    case 'eventos':
+        if (!isset($_SESSION['id_usuario'])) {
             require 'views/login.php';
-            break;
+        } else {
+            require 'views/eventos.php';
+        }
+        break;
 
-        case 'completar_perfil':
-            require 'views/completar_perfil.php';
-            break;
+    case 'login':
+        require 'views/login.php';
+        break;
 
+    case 'completar_perfil':
+        require 'views/completar_perfil.php';
+        break;
 
-        default:
-            require "views/$view.php";
-            break;
-    }
+    case 'panel_admin': // Agregar la vista del panel de administrador
+        if ($_SESSION['tipo_usuario'] === 'admin') {
+            require 'views/panel_admin.php';
+        } else {
+            header("Location: index.php?view=home");
+            exit();
+        }
+        break;
+
+    case 'gestionar_eventos': // Agregar la vista de gestión de eventos
+        if ($_SESSION['tipo_usuario'] === 'admin') {
+            require 'views/gestionar_eventos.php';
+        } else {
+            header("Location: index.php?view=home");
+            exit();
+        }
+        break;
+
+    default:
+        require "views/$view.php";
+        break;
 }
 
 // Incluir el footer solo una vez
