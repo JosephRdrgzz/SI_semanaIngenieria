@@ -30,7 +30,7 @@ try {
     });
 
     // Convertir de nuevo a JSONB y actualizar la base de datos
-    $query = "UPDATE evento SET asistencia = :nueva_asistencia WHERE id = :id AND fecha > NOW()";
+    $query = "UPDATE evento SET asistencia = :nueva_asistencia, capacidad = capacidad + 1 WHERE id = :id AND fecha > NOW()";
     $stmt = $pdo->prepare($query);
     $stmt->execute([
         'nueva_asistencia' => json_encode(array_values($nueva_asistencia)), // Se usa `array_values` para reindexar el array

@@ -102,7 +102,7 @@ function inscribirUsuario($exp, $nombre, $eventosSeleccionados) {
             $asistenciaActual[] = $nuevoAsistente;
 
             // Convertir de nuevo a JSON y actualizar en la base de datos
-            $query = "UPDATE evento SET asistencia = :asistencia WHERE id = :id";
+            $query = "UPDATE evento SET asistencia = :asistencia, capacidad = capacidad - 1 WHERE id = :id";
             $stmt = $pdo->prepare($query);
             $stmt->execute([
                 'asistencia' => json_encode($asistenciaActual),
