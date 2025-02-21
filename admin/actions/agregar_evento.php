@@ -1,0 +1,119 @@
+<?php
+session_start();
+require_once __DIR__ . '/../config/conexion.php';
+
+header("Content-Type: application/json");
+
+// Verificar que el usuario es administrador
+if (!isset($_SESSION['id_usuario']) || $_SESSION['tipo_usuario'] !== 'admin') {
+    echo json_encode(["error" => "Acceso no autorizado"]);
+    exit();
+}
+
+// Obtener los datos del formulario
+$nombre = $_POST['nombre'] ?? null;
+$capacidad = $_POST['capacidad'] ?? null;
+$fecha = $_POST['fecha'] ?? null;
+$hora_inicio = $_POST['hora_inicio'] ?? null;
+$hora_fin = $_POST['hora_fin'] ?? null;
+$lugar = $_POST['lugar'] ?? null;
+$lugar_otro = $_POST['lugar_otro'] ?? null;
+$campus = $_POST['campus'] ?? null;
+$comentario = $_POST['comentario'] ?? null;
+$direccion = $_POST['direccion'] ?? null;
+$lineamientos = $_POST['lineamientos'] ?? null;
+$expositor = $_POST['expositor'] ?? null;
+
+// Si el usuario seleccionó "Otro", usamos el input de texto
+if ($lugar === "otro" && !empty($lugar_otro)) {
+    $lugar = $lugar_otro;
+}
+
+// Validar datos requeridos
+if (!$nombre || !$capacidad || !$fecha || !$hora_inicio || !$hora_fin || !$lugar || !$campus || !$direccion || !$lineamientos || !$expositor) {
+    echo json_encode(["error" => "Todos los campos obligatorios deben llenarse"]);
+    exit();
+}
+
+// **Validar que la hora de inicio sea menor que la de fin**
+if (strtotime($hora_fin) <= strtotime($hora_inicio)) {
+    echo json_encode(["error" => "La hora de inicio debe ser menor que la hora de fin"]);
+    exit();
+}
+
+// **Verificar si hay traslapes en el mismo salón**
+try {
+    $query = "SELECT nombre, fecha, hora_inicio, hora_fin FROM evento 
+              WHERE lugar = :lugar 
+              AND fecha = :fecha 
+              AND (hora_inicio::time, hora_fin::time) OVERLAPS (:hora_inicio::time, :hora_fin::time)";
+
+    $stmt = $pdo->prepare($query);
+    $stmt->execute([
+        'lugar' => $lugar,
+        'fecha' => $fecha,
+        'hora_inicio' => $hora_inicio,
+        'hora_fin' => $hora_fin
+    ]);
+
+    $traslapes = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!empty($traslapes)) {
+        $evento_traslapado = $traslapes[0];
+        echo json_encode([
+            "error" => "El evento se traslapa con otro: '{$evento_traslapado['nombre']}' el {$evento_traslapado['fecha']} de {$evento_traslapado['hora_inicio']} a {$evento_traslapado['hora_fin']}"
+        ]);
+        exit();
+    }
+
+} catch (Exception $e) {
+    echo json_encode(["error" => "Error al verificar traslapes: " . $e->getMessage()]);
+    exit();
+}
+
+// **Validar capacidad del salón**
+try {
+    $queryCapacidad = "SELECT capacidad FROM salones WHERE id_salon = :lugar";
+    $stmtCapacidad = $pdo->prepare($queryCapacidad);
+    $stmtCapacidad->execute(['lugar' => $lugar]);
+    $salon = $stmtCapacidad->fetch(PDO::FETCH_ASSOC);
+
+    if ($salon && $capacidad > $salon['capacidad']) {
+        echo json_encode(["error" => "La capacidad del evento ($capacidad) excede el límite del salón ($salon[capacidad])."]);
+        exit();
+    }
+} catch (Exception $e) {
+    echo json_encode(["error" => "Error al validar capacidad del salón: " . $e->getMessage()]);
+    exit();
+}
+
+// **Insertar evento en la base de datos**
+try {
+    $pdo->beginTransaction();
+
+    $query = "INSERT INTO evento (nombre, capacidad, fecha, hora_inicio, hora_fin, lugar, campus, comentario, direccion, lineamientos, expositor)
+              VALUES (:nombre, :capacidad, :fecha, :hora_inicio, :hora_fin, :lugar, :campus, :comentario, :direccion, :lineamientos, :expositor)";
+
+    $stmt = $pdo->prepare($query);
+    $stmt->execute([
+        'nombre' => $nombre,
+        'capacidad' => $capacidad,
+        'fecha' => $fecha,
+        'hora_inicio' => $hora_inicio,
+        'hora_fin' => $hora_fin,
+        'lugar' => $lugar,
+        'campus' => $campus,
+        'comentario' => $comentario,
+        'direccion' => $direccion,
+        'lineamientos' => $lineamientos,
+        'expositor' => $expositor
+    ]);
+
+    $pdo->commit();
+    echo json_encode(["success" => "Evento agregado correctamente"]);
+
+} catch (Exception $e) {
+    $pdo->rollBack();
+    echo json_encode(["error" => "Error al agregar evento: " . $e->getMessage()]);
+}
+?>

@@ -22,6 +22,12 @@ unset($_SESSION['error']); // Borrar error tras mostrarlo
     <label>Expediente:</label>
     <input type="text" name="exp" id="exp" required><br>
 
+    <!-- Campo de contraseña oculto inicialmente -->
+    <div id="password-container" style="display: none;">
+        <label>Contraseña:</label>
+        <input type="password" name="contraseña" id="password-field"><br>
+    </div>
+
     <input type="submit" value="Ingresar">
 </form>
 
