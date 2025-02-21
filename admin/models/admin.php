@@ -78,7 +78,7 @@ function verificarTraslapesParaEditar($id_evento, $lugar, $fecha, $hora_inicio, 
               WHERE lugar = :lugar 
               AND fecha = :fecha 
               AND id != :id_evento
-              AND (hora_inicio, hora_fin) OVERLAPS (:hora_inicio, :hora_fin)";
+              AND (hora_inicio::TIME, hora_fin::TIME) OVERLAPS (:hora_inicio::TIME, :hora_fin::TIME)";
 
     $stmt = $pdo->prepare($query);
     $stmt->execute([

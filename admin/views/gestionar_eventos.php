@@ -4,7 +4,7 @@ require_once __DIR__ . '/../config/conexion.php';
 
 // Verificar que el usuario es administrador
 if (!isset($_SESSION['id_usuario']) || $_SESSION['tipo_usuario'] !== 'admin') {
-    header("Location: index.php?view=home");
+    header("Location: index.php?view=login");
     exit();
 }
 
@@ -23,10 +23,10 @@ $salones = $stmt_salones->fetchAll(PDO::FETCH_ASSOC);
 <!-- Botón para agregar un nuevo evento -->
 <button onclick="mostrarFormulario()">Agregar Nuevo Evento</button>
 
-<!-- Formulario para agregar un evento -->
+<!-- Formulario para agregar/editar un evento -->
 <div id="formulario-evento" style="display:none;">
-    <h3>Nuevo Evento</h3>
-    <form id="form-agregar-evento">
+    <h3 id="titulo-formulario">Nuevo Evento</h3>
+    <form id="form-evento">
         <input type="hidden" name="id_evento">
         <label>Nombre:</label> <input type="text" name="nombre" required><br>
         <label>Capacidad:</label> <input type="number" name="capacidad" required min="1"><br>
@@ -87,7 +87,6 @@ $salones = $stmt_salones->fetchAll(PDO::FETCH_ASSOC);
             <td><?= $evento['capacidad'] ?></td>
             <td>
                 <button onclick="editarEvento(<?= $evento['id'] ?>)">Editar</button>
-
                 <button onclick="eliminarEvento(<?= $evento['id'] ?>)">Eliminar</button>
             </td>
         </tr>
@@ -99,6 +98,9 @@ $salones = $stmt_salones->fetchAll(PDO::FETCH_ASSOC);
     let eventos = <?= json_encode($eventos) ?>;
 
     function mostrarFormulario() {
+        document.getElementById("titulo-formulario").textContent = "Nuevo Evento";
+        document.getElementById("form-evento").reset();
+        document.querySelector("[name='id_evento']").value = "";
         document.getElementById("formulario-evento").style.display = "block";
     }
 
@@ -106,65 +108,37 @@ $salones = $stmt_salones->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById("formulario-evento").style.display = "none";
     }
 
-    // Manejo de selección de 'Otro' en Lugar
     document.getElementById("select-lugar").addEventListener("change", function() {
         let otroInput = document.getElementById("lugar_otro");
-        if (this.value === "otro") {
-            otroInput.style.display = "block";
-            otroInput.required = true;
-        } else {
-            otroInput.style.display = "none";
-            otroInput.required = false;
-        }
+        otroInput.style.display = (this.value === "otro") ? "block" : "none";
+        otroInput.required = (this.value === "otro");
     });
 
-    // Manejo de envío del formulario
-    document.getElementById("form-agregar-evento").addEventListener("submit", function(e) {
+    document.getElementById("form-evento").addEventListener("submit", function(e) {
         e.preventDefault();
 
         let formData = new FormData(this);
-        fetch("actions/agregar_evento.php", {
+        let id_evento = formData.get("id_evento");
+        let url = id_evento ? "actions/editar_evento.php" : "actions/agregar_evento.php";
+
+        fetch(url, {
             method: "POST",
             body: formData
         })
             .then(response => response.json())
             .then(data => {
+                if (data.debug_query) {
+                    alert("Consulta ejecutada:\n" + data.debug_query);
+                }
+
                 if (data.success) {
-                    alert("Evento agregado correctamente.");
+                    alert(data.success);
                     location.reload();
                 } else {
                     alert("Error: " + data.error);
                 }
             })
             .catch(error => console.error("Error en fetch:", error));
-    });
-
-    function eliminarEvento(id) {
-        if (!confirm("¿Seguro que deseas eliminar este evento?")) return;
-
-        fetch("actions/eliminar_evento.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id })
-        }).then(response => response.json()).then(data => {
-            if (data.success) {
-                alert("Evento eliminado.");
-                location.reload();
-            } else {
-                alert("Error: " + data.error);
-            }
-        });
-    }
-
-    document.getElementById("select-lugar").addEventListener("change", function() {
-        let otroInput = document.getElementById("lugar_otro");
-        if (this.value === "otro") {
-            otroInput.style.display = "block";
-            otroInput.required = true;
-        } else {
-            otroInput.style.display = "none";
-            otroInput.required = false;
-        }
     });
 
     function editarEvento(id) {
@@ -175,9 +149,7 @@ $salones = $stmt_salones->fetchAll(PDO::FETCH_ASSOC);
             return;
         }
 
-        let form = document.getElementById("form-agregar-evento");
-        form.dataset.id = id;  // Guardar el ID en el formulario
-
+        document.getElementById("titulo-formulario").textContent = "Editar Evento";
         document.querySelector("[name='id_evento']").value = id;
         document.querySelector("[name='nombre']").value = evento.nombre;
         document.querySelector("[name='capacidad']").value = evento.capacidad;
@@ -190,9 +162,8 @@ $salones = $stmt_salones->fetchAll(PDO::FETCH_ASSOC);
         document.querySelector("[name='lineamientos']").value = evento.lineamientos;
         document.querySelector("[name='expositor']").value = evento.expositor;
 
-        // Manejo del lugar
         let selectLugar = document.querySelector("[name='lugar']");
-        if (evento.lugar !== "otro") {
+        if (selectLugar.querySelector(`option[value='${evento.lugar}']`)) {
             selectLugar.value = evento.lugar;
             document.getElementById("lugar_otro").style.display = "none";
         } else {
@@ -203,6 +174,4 @@ $salones = $stmt_salones->fetchAll(PDO::FETCH_ASSOC);
 
         document.getElementById("formulario-evento").style.display = "block";
     }
-
-
 </script>
