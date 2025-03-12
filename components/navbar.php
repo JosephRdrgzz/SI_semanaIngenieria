@@ -7,7 +7,7 @@
     <?php if (isset($_SESSION['id_usuario'])): ?>
         <a href="index.php?view=eventos"> EVENTOS </a>
         <a href="index.php?view=mis_eventos">Mis Eventos</a>
-        <a href="index.php?view=logout">(<?= $_SESSION['nombre'] ?? 'Invitado' ?>)</a>
+        <a href="views/editar_perfil.php?exp=<?= $_SESSION['usuario']['exp'] ?>"><?= $_SESSION['usuario']['nombre'] ?></a>
         <a href="index.php?action=logout"> CERRAR SESIÓN </a>
     <?php else: ?>
         <a href="index.php?view=login"> INICIAR SESIÓN </a>

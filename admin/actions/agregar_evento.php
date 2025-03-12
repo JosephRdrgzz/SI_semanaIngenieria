@@ -12,6 +12,14 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['tipo_usuario'] !== 'admin') {
 
 // Obtener los datos del formulario
 $nombre = $_POST['nombre'] ?? null;
+$tipo_evento = $_POST['tipo_evento'] ?? null;
+
+// Validar que el tipo de evento es uno de los permitidos
+$tipos_permitidos = ['Taller', 'Exposición', 'Competencia', 'Oportunidad Laboral'];
+if (!in_array($tipo_evento, $tipos_permitidos)) {
+    echo json_encode(["error" => "Tipo de evento no válido"]);
+    exit();
+}
 $capacidad = $_POST['capacidad'] ?? null;
 $fecha = $_POST['fecha'] ?? null;
 $hora_inicio = $_POST['hora_inicio'] ?? null;
@@ -45,12 +53,14 @@ if (strtotime($hora_fin) <= strtotime($hora_inicio)) {
 try {
     $query = "SELECT nombre, fecha, hora_inicio, hora_fin FROM evento 
               WHERE lugar = :lugar 
+              AND campus = :campus 
               AND fecha = :fecha 
               AND (hora_inicio::time, hora_fin::time) OVERLAPS (:hora_inicio::time, :hora_fin::time)";
 
     $stmt = $pdo->prepare($query);
     $stmt->execute([
         'lugar' => $lugar,
+        'campus' => $campus,
         'fecha' => $fecha,
         'hora_inicio' => $hora_inicio,
         'hora_fin' => $hora_fin
@@ -91,12 +101,13 @@ try {
 try {
     $pdo->beginTransaction();
 
-    $query = "INSERT INTO evento (nombre, capacidad, fecha, hora_inicio, hora_fin, lugar, campus, comentario, direccion, lineamientos, expositor)
-              VALUES (:nombre, :capacidad, :fecha, :hora_inicio, :hora_fin, :lugar, :campus, :comentario, :direccion, :lineamientos, :expositor)";
+    $query = "INSERT INTO evento (nombre, tipo_evento, capacidad, fecha, hora_inicio, hora_fin, lugar, campus, comentario, direccion, lineamientos, expositor)
+              VALUES (:nombre, :tipo_evento, :capacidad, :fecha, :hora_inicio, :hora_fin, :lugar, :campus, :comentario, :direccion, :lineamientos, :expositor)";
 
     $stmt = $pdo->prepare($query);
     $stmt->execute([
         'nombre' => $nombre,
+        'tipo_evento' => $tipo_evento,
         'capacidad' => $capacidad,
         'fecha' => $fecha,
         'hora_inicio' => $hora_inicio,

@@ -8,14 +8,10 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['tipo_usuario'] !== 'admin') {
     exit();
 }
 
-// Obtener eventos y salones desde la base de datos
+// Obtener eventos desde la base de datos
 $query_eventos = "SELECT * FROM evento ORDER BY fecha, hora_inicio";
 $stmt_eventos = $pdo->query($query_eventos);
 $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
-
-$query_salones = "SELECT id_salon, capacidad FROM salones ORDER BY id_salon";
-$stmt_salones = $pdo->query($query_salones);
-$salones = $stmt_salones->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <h2>Gestión de Eventos</h2>
@@ -29,29 +25,35 @@ $salones = $stmt_salones->fetchAll(PDO::FETCH_ASSOC);
     <form id="form-evento">
         <input type="hidden" name="id_evento">
         <label>Nombre:</label> <input type="text" name="nombre" required><br>
+        <label>Tipo de Evento:</label>
+        <select name="tipo_evento" required>
+            <option value="">Seleccione un tipo</option>
+            <option value="Taller">Taller</option>
+            <option value="Exposición">Exposición</option>
+            <option value="Competencia">Competencia</option>
+            <option value="Oportunidad Laboral">Oportunidad Laboral</option>
+        </select><br>
+
         <label>Capacidad:</label> <input type="number" name="capacidad" required min="1"><br>
         <label>Fecha:</label> <input type="date" name="fecha" required><br>
         <label>Hora Inicio:</label> <input type="time" name="hora_inicio" required><br>
         <label>Hora Fin:</label> <input type="time" name="hora_fin" required><br>
-
-        <!-- Selección de salón con opción 'Otro' -->
-        <label>Lugar:</label>
-        <select name="lugar" id="select-lugar">
-            <?php foreach ($salones as $salon): ?>
-                <option value="<?= htmlspecialchars($salon['id_salon']) ?>">
-                    <?= htmlspecialchars($salon['id_salon']) ?> - Capacidad <?= htmlspecialchars($salon['capacidad']) ?>
-                </option>
-            <?php endforeach; ?>
-            <option value="otro">Otro</option>
-        </select>
-        <input type="text" name="lugar_otro" id="lugar_otro" style="display:none;" placeholder="Especificar otro lugar"><br>
-
         <label>Campus:</label>
-        <select name="campus" required>
+        <select name="campus" id="select-campus" required>
+            <option value="">Seleccione un campus</option>
             <option value="Norte">Norte</option>
             <option value="Sur">Sur</option>
             <option value="Externo">Externo</option>
         </select><br>
+
+        <!-- Selección de salón con opción 'Otro' -->
+        <label>Lugar:</label>
+        <select name="lugar" id="select-lugar">
+            <!-- Opciones de salones se cargarán dinámicamente -->
+        </select>
+        <input type="text" name="lugar_otro" id="lugar_otro" style="display:none;" placeholder="Especificar otro lugar"><br>
+
+
 
         <label>Comentario:</label> <textarea name="comentario"></textarea><br>
         <label>Dirección:</label> <textarea name="direccion" required></textarea><br>
@@ -68,6 +70,7 @@ $salones = $stmt_salones->fetchAll(PDO::FETCH_ASSOC);
     <thead>
     <tr>
         <th>Nombre</th>
+        <th>Tipo</th>
         <th>Fecha</th>
         <th>Horario</th>
         <th>Lugar</th>
@@ -80,6 +83,7 @@ $salones = $stmt_salones->fetchAll(PDO::FETCH_ASSOC);
     <?php foreach ($eventos as $evento): ?>
         <tr>
             <td><?= htmlspecialchars($evento['nombre']) ?></td>
+            <td><?= $evento['tipo_evento'] ?></td>
             <td><?= $evento['fecha'] ?></td>
             <td><?= $evento['hora_inicio'] . " - " . $evento['hora_fin'] ?></td>
             <td><?= htmlspecialchars($evento['lugar']) ?></td>
@@ -102,11 +106,38 @@ $salones = $stmt_salones->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById("form-evento").reset();
         document.querySelector("[name='id_evento']").value = "";
         document.getElementById("formulario-evento").style.display = "block";
+        document.getElementById("select-lugar").style.display = "none"; // Hide by default
     }
 
     function ocultarFormulario() {
         document.getElementById("formulario-evento").style.display = "none";
     }
+
+    document.getElementById("select-campus").addEventListener("change", function() {
+        let campus = this.value;
+        let selectLugar = document.getElementById("select-lugar");
+        let otroInput = document.getElementById("lugar_otro");
+
+        if (campus === "Externo") {
+            otroInput.style.display = "block";
+            otroInput.required = true;
+            selectLugar.style.display = "none";
+            selectLugar.required = false;
+        } else {
+            otroInput.style.display = "none";
+            otroInput.required = false;
+            selectLugar.style.display = "block";
+            selectLugar.required = true;
+            fetch(`actions/obtener_salones.php?campus=${campus}`)
+                .then(response => response.json())
+                .then(data => {
+                    selectLugar.innerHTML = data.map(salon =>
+                        `<option value="${salon.id_salon}">${salon.id_salon} - Capacidad ${salon.capacidad}</option>`
+                    ).join('') + '<option value="otro">Otro</option>';
+                })
+                .catch(error => console.error("Error al obtener salones:", error));
+        }
+    });
 
     document.getElementById("select-lugar").addEventListener("change", function() {
         let otroInput = document.getElementById("lugar_otro");
@@ -152,6 +183,7 @@ $salones = $stmt_salones->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById("titulo-formulario").textContent = "Editar Evento";
         document.querySelector("[name='id_evento']").value = id;
         document.querySelector("[name='nombre']").value = evento.nombre;
+        document.querySelector("[name='tipo_evento']").value = evento.tipo_evento;
         document.querySelector("[name='capacidad']").value = evento.capacidad;
         document.querySelector("[name='fecha']").value = evento.fecha;
         document.querySelector("[name='hora_inicio']").value = evento.hora_inicio;

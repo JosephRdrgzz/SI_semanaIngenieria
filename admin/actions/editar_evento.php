@@ -17,6 +17,14 @@ try {
     // Recibir los datos del formulario
     $id_evento = $_POST['id_evento'] ?? null;
     $nombre = $_POST['nombre'] ?? null;
+    $tipo_evento = $_POST['tipo_evento'] ?? null;
+
+    // Validar que el tipo de evento es uno de los permitidos
+    $tipos_permitidos = ['Taller', 'Exposición', 'Competencia', 'Oportunidad Laboral'];
+    if (!in_array($tipo_evento, $tipos_permitidos)) {
+        echo json_encode(["error" => "Tipo de evento no válido"]);
+        exit();
+    }
     $capacidad = $_POST['capacidad'] ?? null;
     $fecha = $_POST['fecha'] ?? null;
     $hora_inicio = $_POST['hora_inicio'] ?? null;
@@ -69,7 +77,7 @@ try {
 
     // 🔹 Construcción de la consulta SQL con los valores
     $query_update = "UPDATE evento 
-                     SET nombre = :nombre, capacidad = :capacidad, fecha = :fecha, 
+                     SET nombre = :nombre,tipo_evento = :tipo_evento, capacidad = :capacidad, fecha = :fecha, 
                          hora_inicio = :hora_inicio, hora_fin = :hora_fin, lugar = :lugar, 
                          campus = :campus, comentario = :comentario, direccion = :direccion, 
                          lineamientos = :lineamientos, expositor = :expositor
@@ -84,6 +92,7 @@ try {
         'id_evento' => $id_evento,
         'nombre' => $nombre,
         'capacidad' => $capacidad,
+        'tipo_evento' => $tipo_evento,
         'fecha' => $fecha,
         'hora_inicio' => $hora_inicio,
         'hora_fin' => $hora_fin,
