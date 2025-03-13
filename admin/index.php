@@ -59,3 +59,5 @@ switch ($view) {
 // Incluir el footer solo una vez
 require __DIR__ . '/components/footer.php';
 ?>
+
+

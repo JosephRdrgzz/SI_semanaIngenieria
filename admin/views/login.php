@@ -18,18 +18,30 @@ unset($_SESSION['error']); // Borrar error tras mostrarlo
     <p style="color:red;"><?= htmlspecialchars($error) ?></p>
 <?php endif; ?>
 
-<form method="POST" action="actions/login.php">
-    <label>Expediente:</label>
-    <input type="text" name="exp" id="exp" required><br>
-
-    <!-- Campo de contraseña oculto inicialmente -->
-    <div id="password-container" style="display: none;">
-        <label>Contraseña:</label>
-        <input type="password" name="contraseña" id="password-field"><br>
-    </div>
-
-    <input type="submit" value="Ingresar">
-</form>
+<div id="form-ui">
+    <form action="actions/login.php" method="post" id="form">
+        <div id="form-body">
+            <div id="welcome-lines">
+                <div id="welcome-line-1">ADMIN</div>
+            </div>
+            <div id="input-area">
+                <div class="form-inp">
+                    <input placeholder="Email Address" type="text" name="exp" required>
+                </div>
+                <div class="form-inp">
+                    <input placeholder="Password" type="password" name="contraseña" required>
+                </div>
+            </div>
+            <div id="submit-button-cvr">
+                <button id="submit-button" type="submit">Login</button>
+            </div>
+            <div id="forgot-pass">
+                <a href="#">Forgot password?</a>
+            </div>
+            <div id="bar"></div>
+        </div>
+    </form>
+</div>
 
 <script>
     document.getElementById("exp").addEventListener("blur", function () {

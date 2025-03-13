@@ -5,6 +5,10 @@ require_once __DIR__ . '/../models/eventos.php';
 
 header("Content-Type: application/json");
 
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 // Verificar sesión
 if (!isset($_SESSION['usuario'])) {
     echo json_encode(["error" => "Debes iniciar sesión para inscribirte."]);
@@ -23,7 +27,7 @@ if (empty($eventosSeleccionados)) {
     exit();
 }
 
-// **Verificar si hay TRASLAPES antes de inscribirse**
+// Verificar si hay traslapes antes de inscribirse
 $traslapes = verificarTraslapes($exp, $eventosSeleccionados);
 
 if (!empty($traslapes)) {
@@ -31,7 +35,7 @@ if (!empty($traslapes)) {
     exit();
 }
 
-// **Inscribir al usuario en los eventos**
+// Inscribir al usuario en los eventos
 $resultado = inscribirUsuario($exp, $nombre, $eventosSeleccionados);
 echo json_encode($resultado);
 ?>

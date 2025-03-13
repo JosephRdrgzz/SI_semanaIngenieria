@@ -11,7 +11,7 @@ $exp = $_SESSION['usuario']['exp'];
 
 try {
     // Obtener eventos donde el usuario NO está inscrito
-    $query = "SELECT id, nombre, fecha, hora_inicio, hora_fin, lugar, campus 
+    $query = "SELECT id, nombre, fecha, hora_inicio, hora_fin, lugar, campus, tipo_evento 
               FROM evento
               WHERE NOT EXISTS (
                   SELECT 1 FROM jsonb_array_elements(evento.asistencia) as asistentes

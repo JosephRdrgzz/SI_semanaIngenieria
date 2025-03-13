@@ -26,6 +26,7 @@ if (!$alumno) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Editar Perfil</title>
+    <link rel="stylesheet" href="/semanaIng/styles/styles.css">
     <script>
         function actualizarPerfil(event) {
             event.preventDefault();
@@ -51,37 +52,41 @@ if (!$alumno) {
 </head>
 <body>
 
+<?php include '../components/header.php'; ?>
+<?php include '../components/navbar.php'; ?>
+
 <h2>Editar Perfil</h2>
 <div id="mensaje"></div>
 
-<form id="form-editar-perfil" onsubmit="actualizarPerfil(event)">
+<form id="form-editar-perfil" class="form" onsubmit="actualizarPerfil(event)">
     <label>Nombre:</label>
-    <input type="text" value="<?= htmlspecialchars($alumno['nombre']) ?>" disabled><br>
+    <input type="text" class="input" value="<?= htmlspecialchars($alumno['nombre']) ?>" disabled><br>
 
     <label>Programa:</label>
-    <input type="text" value="<?= htmlspecialchars($alumno['idprograma']) ?>" disabled><br>
+    <input type="text" class="input" value="<?= htmlspecialchars($alumno['idprograma']) ?>" disabled><br>
 
     <label>Semestre:</label>
-    <input type="text" value="<?= htmlspecialchars($alumno['semestre']) ?>" disabled><br>
+    <input type="text" class="input" value="<?= htmlspecialchars($alumno['semestre']) ?>" disabled><br>
 
     <label>Campus:</label>
-    <select name="campus">
+    <select name="campus" class="input">
         <option value="Norte" <?= $alumno['campus'] === 'Norte' ? 'selected' : '' ?>>Norte</option>
         <option value="Sur" <?= $alumno['campus'] === 'Sur' ? 'selected' : '' ?>>Sur</option>
-        <option value="Externo" <?= $alumno['campus'] === 'Externo' ? 'selected' : '' ?>>Externo</option>
     </select><br>
 
     <label>Correo:</label>
-    <input type="email" name="mail" value="<?= htmlspecialchars($alumno['mail']) ?>" required><br>
+    <input type="email" name="mail" class="input" value="<?= htmlspecialchars($alumno['mail']) ?>" required><br>
 
-    <label>Celular:</label>
-    <input type="text" name="celular" value="<?= htmlspecialchars($alumno['celular']) ?>" required><br>
+    <label>Celular (10 dígitos):</label>
+    <input type="text" name="celular" class="input" value="<?= htmlspecialchars($alumno['celular']) ?>" required pattern="\d{10}"><br>
 
     <label>Responsable:</label>
-    <input type="text" name="responsable" value="<?= htmlspecialchars($alumno['responsable']) ?>" required><br>
+    <input type="text" name="responsable" class="input" value="<?= htmlspecialchars($alumno['responsable']) ?>" required pattern="\d{10}"><br>
 
-    <button type="submit">Guardar Cambios</button>
+    <button type="submit" class="button">Guardar Cambios</button>
 </form>
+
+<?php include '../components/footer.php'; ?>
 
 </body>
 </html>

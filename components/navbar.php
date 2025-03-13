@@ -1,21 +1,22 @@
-<div align="center">
-    <a href="index.php?view=home"> INICIO </a>
-    <a href="index.php?view=generalidades"> GENERALIDADES </a>
-    <a href="index.php?view=concursos"> CONCURSOS </a>
-    <a href="index.php?view=contacto"> CONTACTO </a>
+<div class="nav">
+    <div class="container">
+        <button class="hamburger" id="hamburger">
+            &#9776;
+        </button>
+        <div id="nav-links" class="nav-links">
+            <a class="btn" href="index.php?view=home">INICIO</a>
+            <a class="btn" href="index.php?view=generalidades">GENERALIDADES</a>
+            <a class="btn" href="index.php?view=concursos">CONCURSOS</a>
+            <a class="btn" href="index.php?view=contacto">CONTACTO</a>
 
-    <?php if (isset($_SESSION['id_usuario'])): ?>
-        <a href="index.php?view=eventos"> EVENTOS </a>
-        <a href="index.php?view=mis_eventos">Mis Eventos</a>
-        <a href="views/editar_perfil.php?exp=<?= $_SESSION['usuario']['exp'] ?>"><?= $_SESSION['usuario']['nombre'] ?></a>
-        <a href="index.php?action=logout"> CERRAR SESIÓN </a>
-    <?php else: ?>
-        <a href="index.php?view=login"> INICIAR SESIÓN </a>
-    <?php endif; ?>
-    <!-- Mostrar Panel de Administración solo si el usuario es admin -->
-    <?php if ($_SESSION['tipo_usuario'] === 'admin'): ?>
-        <a href="index.php?view=panel_admin">Panel de Administración</a>
-    <?php endif; ?>
-    <pre><?php //var_dump($_SESSION); ?></pre>
-
+            <?php if (isset($_SESSION['id_usuario'])): ?>
+                <a class="btn" href="index.php?view=eventos">EVENTOS</a>
+                <a class="btn" href="index.php?view=mis_eventos">Mis Eventos</a>
+                <a class="btn" href="index.php?view=editar_perfil&exp=<?= $_SESSION['usuario']['exp'] ?>"><?= $_SESSION['usuario']['nombre'] ?></a>
+                <a class="btn" href="index.php?action=logout">CERRAR SESIÓN</a>
+            <?php else: ?>
+                <a class="btn" href="index.php?view=login">INICIAR SESIÓN</a>
+            <?php endif; ?>
+        </div>
+    </div>
 </div>
