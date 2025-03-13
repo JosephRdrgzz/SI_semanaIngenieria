@@ -1,5 +1,6 @@
 /* Asegura que el body ocupe toda la pantalla */
 html, body {
+    font-family: 'Lato', sans-serif;
     height: 100%;
     margin: 0;
     padding: 0;
@@ -97,7 +98,7 @@ a {
 /* Navbar styles */
 .nav {
     width: 100%;
-    background: linear-gradient(rgba(244, 121, 69, 0.97), rgb(46, 46, 46));
+    background: linear-gradient(rgb(255, 255, 255), rgb(46, 46, 46));
     padding: 20px 0;
 }
 
@@ -514,9 +515,9 @@ a {
     max-width: 400px;
     height: auto;
     padding: 25px;
-    background-color: #161616;
-    box-shadow: 0px 15px 60px #e86907;
-    outline: 1px solid #e86907;
+    background-color: #ffffff;
+    box-shadow: 0px 15px 60px rgba(0, 0, 0, 0.67);
+    outline: 1px solid #151515;
     border-radius: 10px;
 }
 
@@ -536,7 +537,7 @@ a {
 }
 
 #welcome-line-1 {
-    color: #e86907;
+    color: #151515;
     font-weight: 600;
     font-size: 40px;
 }
@@ -660,5 +661,293 @@ a {
     #footer {
         position: relative;
         bottom: 0;
+    }
+}
+
+
+
+
+/* tabla de gestión de eventos */
+
+/* From Uiverse.io by vinodjangid07 */
+.Btn {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100px;
+    height: 40px;
+    border: none;
+    padding: 0px 20px;
+    background-color: rgb(168, 38, 255);
+    color: white;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 10px;
+    transition-duration: .3s;
+}
+
+.svg {
+    width: 13px;
+    position: absolute;
+    right: 0;
+    margin-right: 20px;
+    fill: white;
+    transition-duration: .3s;
+}
+
+.Btn:hover {
+    color: transparent;
+}
+
+.Btn:hover svg {
+    right: 43%;
+    margin: 0;
+    padding: 0;
+    border: none;
+    transition-duration: .3s;
+}
+
+.Btn:active {
+    transform: translate(3px , 3px);
+    transition-duration: .3s;
+    box-shadow: 2px 2px 0px rgb(140, 32, 212);
+}
+
+
+
+
+
+/* From Uiverse.io by cssbuttons-io */
+.unique-button {
+    width: 120px;
+    height: 40px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    background: red;
+    border: none;
+    border-radius: 5px;
+    box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+    background: #e62222;
+}
+
+.unique-button, .unique-button span {
+    transition: 200ms;
+}
+
+.unique-button .text {
+        transform: translateX(10px);
+        color: white;
+        font-weight: bold;
+    }
+
+.unique-button .icon {
+    position: absolute;
+    border-left: 1px solid #c41b1b;
+    transform: translateX(88px);
+    height: 32px;
+    width: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.unique-button svg {
+    width: 12px;
+    fill: #eee;
+}
+
+.unique-button:hover {
+    background: #ff3636;
+}
+
+.unique-button:hover .text {
+    color: transparent;
+}
+
+.unique-button:hover .icon {
+    width: 120px;
+    border-left: none;
+    transform: translateX(0);
+}
+
+.unique-button:focus {
+    outline: none;
+}
+
+.unique-button:active .icon svg {
+    transform: scale(0.8);
+}
+
+
+
+ .Btn, .unique-button {
+     margin-bottom: 5px; /* Ajusta el valor según el espacio deseado */
+ }
+
+
+h2 {
+    font-size: 26px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+h2 small {
+    font-size: 0.5em;
+}
+
+.responsive-table {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.responsive-table li {
+    border-radius: 3px;
+    padding: 25px 30px;
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 25px;
+}
+
+.responsive-table .table-header {
+    background-color: #151515;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: white;
+}
+
+.responsive-table .table-row {
+    background-color: #ffffff;
+    box-shadow: 0px 0px 9px 0px rgba(0, 0, 0, 0.1);
+}
+.responsive-table .col {
+    flex: 1;
+    min-width: 100px; /* Ancho mínimo para cada columna */
+    max-width: 150px; /* Evita que las columnas se expandan demasiado */
+    text-align: center;
+    word-wrap: break-word;
+}
+
+
+.responsive-table .col-1 {
+    flex: 1.5; /* Aumenta ligeramente el tamaño de la columna */
+    max-width: 200px; /* Aumenta el ancho máximo */
+    word-wrap: break-word; /* Hace que el texto se divida en varias líneas */
+    overflow: hidden;
+    text-overflow: ellipsis; /* Agrega "..." si el texto es muy largo */
+    white-space: normal; /* Permite que el texto baje a otra línea */
+}
+
+
+.responsive-table .col-2 {
+    flex-basis: 15%;
+}
+
+.responsive-table .col-3 {
+    flex-basis: 10%;
+}
+
+.responsive-table .col-4 {
+    flex-basis: 15%;
+}
+
+.responsive-table .col-5 {
+    flex-basis: 15%;
+}
+
+.responsive-table .col-6 {
+    flex-basis: 10%;
+}
+
+.responsive-table .col-7 {
+    flex-basis: 10%;
+}
+
+.responsive-table .col-8 {
+    flex-basis: 15%;
+}
+
+@media all and (max-width: 767px) {
+    .responsive-table .table-header {
+        display: none;
+    }
+
+    .responsive-table li {
+        display: block;
+    }
+
+    .responsive-table .col {
+        flex-basis: 100%;
+        display: flex;
+        padding: 10px 0;
+    }
+
+    .responsive-table .col:before {
+        color: #6C7A89;
+        padding-right: 10px;
+        content: attr(data-label);
+        flex-basis: 50%;
+        text-align: right;
+    }
+}
+
+
+
+
+/* formulario para agregar eventos */
+.admin-events-container {
+    display: flex;              /* Hacemos uso de flexbox */
+    flex-direction: column;     /* Apilamos los elementos verticalmente */
+    align-items: center;        /* Centra horizontalmente todo el contenido */
+    justify-content: center;    /* Opcional: centrar verticalmente si hay espacio */
+    text-align: center;         /* Centra el texto dentro del contenedor */
+    margin: 0 auto;            /* Para que se centre en la página si hay ancho fijo */
+    max-width: 600px;          /* Opcional: limite el ancho si gustas */
+    padding: 20px;             /* Opcional: espacio alrededor */
+}
+
+
+.agregar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 9px 12px;
+    gap: 8px;
+    height: 40px;
+    width: 201px;
+    border: none;
+    background: #FF342B;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.lable {
+    line-height: 22px;
+    font-size: 17px;
+    color: #fff;
+    font-family: sans-serif;
+    letter-spacing: 1px;
+}
+
+.agregar:hover {
+    background: #e52e26;
+}
+
+.agregar:hover .svg-icon {
+    animation: slope 1s linear infinite;
+}
+
+@keyframes slope {
+    0% {
+    }
+
+    50% {
+        transform: rotate(10deg);
+    }
+
+    100% {
     }
 }
