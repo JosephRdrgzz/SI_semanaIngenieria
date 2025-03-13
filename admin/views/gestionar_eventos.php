@@ -187,12 +187,12 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
 
     function editarEvento(id) {
         let evento = eventos.find(e => e.id == id);
-
         if (!evento) {
             alert("Error: No se encontró el evento.");
             return;
         }
 
+        // 1. Rellenar los campos generales del formulario
         document.getElementById("titulo-formulario").textContent = "Editar Evento";
         document.querySelector("[name='id_evento']").value = id;
         document.querySelector("[name='nombre']").value = evento.nombre;
@@ -207,18 +207,50 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
         document.querySelector("[name='lineamientos']").value = evento.lineamientos;
         document.querySelector("[name='expositor']").value = evento.expositor;
 
-        let selectLugar = document.querySelector("[name='lugar']");
-        if (selectLugar.querySelector(`option[value='${evento.lugar}']`)) {
-            selectLugar.value = evento.lugar;
-            document.getElementById("lugar_otro").style.display = "none";
+        // 2. Mostrar el formulario
+        document.getElementById("formulario-evento").style.display = "block";
+
+        // 3. Hacer un fetch de los salones para el campus del evento
+        let campus = evento.campus;
+        let selectLugar = document.getElementById("select-lugar");
+        let otroInput = document.getElementById("lugar_otro");
+
+        // Si es "Externo", mostramos directamente el input "otro"
+        if (campus === "Externo") {
+            // Forzamos "lugar_otro" como el lugar si el evento.lugar no está vacío
+            selectLugar.style.display = "none";
+            otroInput.style.display = "block";
+            otroInput.value = evento.lugar;
+            otroInput.required = true;
         } else {
-            selectLugar.value = "otro";
-            document.getElementById("lugar_otro").style.display = "block";
-            document.getElementById("lugar_otro").value = evento.lugar;
+            // Campus es Norte o Sur → cargamos salones desde el backend
+            fetch(`actions/obtener_salones.php?campus=${campus}`)
+                .then(response => response.json())
+                .then(data => {
+                    // 3.1. Rellenar el <select> con las opciones "id_salon - Capacidad X"
+                    selectLugar.innerHTML = data.map(salon =>
+                        `<option value="${salon.id_salon}">${salon.id_salon} - Capacidad ${salon.capacidad}</option>`
+                    ).join('') + '<option value="otro">Otro</option>';
+
+                    selectLugar.style.display = "block";
+                    otroInput.style.display = "none";
+                    otroInput.required = false;
+
+                    // 3.2. Verificar si el lugar del evento coincide con alguno de los salones
+                    if (selectLugar.querySelector(`option[value='${evento.lugar}']`)) {
+                        selectLugar.value = evento.lugar; // Seleccionamos el lugar
+                    } else {
+                        // No coincide → es "otro"
+                        selectLugar.value = "otro";
+                        otroInput.style.display = "block";
+                        otroInput.value = evento.lugar;  // Asignamos el valor "otro" al input
+                        otroInput.required = true;
+                    }
+                })
+                .catch(error => console.error("Error al obtener salones:", error));
         }
 
-        document.getElementById("formulario-evento").style.display = "block";
-        // Desplazarte suavemente hasta el formulario
+        // 4. Desplazar la vista suavemente hacia el formulario
         document.getElementById("formulario-evento").scrollIntoView({
             behavior: "smooth"
         });
