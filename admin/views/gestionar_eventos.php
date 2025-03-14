@@ -18,56 +18,136 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
 
     <!-- Botón para agregar un nuevo evento -->
     <button class="agregar" onclick="mostrarFormulario()">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" viewBox="0 0 24 24" height="24" fill="none" class="svg-icon"><g stroke-width="2" stroke-linecap="round" stroke="#fff"><rect y="5" x="4" width="16" rx="2" height="16"></rect><path d="m8 3v4"></path><path d="m16 3v4"></path><path d="m4 11h16"></path></g></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" viewBox="0 0 24 24" height="24" fill="none" class="svg-icon">
+            <g stroke-width="2" stroke-linecap="round" stroke="#fff">
+                <rect y="5" x="4" width="16" rx="2" height="16"></rect>
+                <path d="m8 3v4"></path>
+                <path d="m16 3v4"></path>
+                <path d="m4 11h16"></path>
+            </g>
+        </svg>
         <span class="lable">Agregar Evento</span>
     </button>
 
-    <!-- Formulario para agregar/editar un evento -->
-    <div id="formulario-evento" style="display:none;">
-        <h3 id="titulo-formulario">Nuevo Evento</h3>
+    <!-- Formulario para agregar/editar un evento con estilo "login-box" -->
+    <div class="login-box" id="formulario-evento" style="display: none;">
+        <p id="titulo-formulario">Nuevo Evento</p> <!-- Cambia a "Editar Evento" en editarEvento() -->
+
         <form id="form-evento">
+            <!-- ID oculto para edición -->
             <input type="hidden" name="id_evento">
-            <label>Nombre:</label> <input type="text" name="nombre" required><br>
-            <label>Tipo de Evento:</label>
-            <select name="tipo_evento" required>
-                <option value="">Seleccione un tipo</option>
-                <option value="Taller">Taller</option>
-                <option value="Exposición">Exposición</option>
-                <option value="Competencia">Competencia</option>
-                <option value="Oportunidad Laboral">Oportunidad Laboral</option>
-            </select><br>
 
-            <label>Capacidad:</label> <input type="number" name="capacidad" required min="1"><br>
-            <label>Fecha:</label> <input type="date" name="fecha" required><br>
-            <label>Hora Inicio:</label> <input type="time" name="hora_inicio" required><br>
-            <label>Hora Fin:</label> <input type="time" name="hora_fin" required><br>
-            <label>Campus:</label>
-            <select name="campus" id="select-campus" required>
-                <option value="">Seleccione un campus</option>
-                <option value="Norte">Norte</option>
-                <option value="Sur">Sur</option>
-                <option value="Externo">Externo</option>
-            </select><br>
+            <!-- Agrupamos en filas de dos columnas con .two-column -->
+            <div class="two-column">
+                <!-- Nombre (con label flotante normal) -->
+                <div class="user-box">
+                    <label>Nombre</label>
 
-            <!-- Selección de salón con opción 'Otro' -->
-            <label>Lugar:</label>
-            <select name="lugar" id="select-lugar">
-                <!-- Opciones de salones se cargarán dinámicamente -->
-            </select>
-            <input type="text" name="lugar_otro" id="lugar_otro" style="display:none;" placeholder="Especificar otro lugar"><br>
+                    <input type="text" name="nombre" required>
+                </div>
 
-            <label>Comentario:</label> <textarea name="comentario"></textarea><br>
-            <label>Dirección:</label> <textarea name="direccion" required></textarea><br>
-            <label>Lineamientos:</label> <textarea name="lineamientos" required></textarea><br>
-            <label>Expositor:</label> <input type="text" name="expositor" required><br>
-            <button type="submit">Guardar</button>
-            <button type="button" onclick="ocultarFormulario()">Cancelar</button>
+                <!-- Tipo de Evento (sin flotante) -->
+                <div class="user-box no-floating select-box">
+                    <label for="tipo_evento">Tipo de Evento</label>
+                    <select name="tipo_evento" id="tipo_evento" required>
+                        <option value="">Seleccione un tipo</option>
+                        <option value="Taller">Taller</option>
+                        <option value="Exposición">Exposición</option>
+                        <option value="Competencia">Competencia</option>
+                        <option value="Oportunidad Laboral">Oportunidad Laboral</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="two-column">
+                <!-- Capacidad (sin flotante) -->
+                <div class="user-box no-floating">
+                    <label for="capacidad">Capacidad</label>
+                    <input type="number" name="capacidad" id="capacidad" min="1" required>
+                </div>
+
+                <!-- Fecha (sin flotante) -->
+                <div class="user-box no-floating">
+                    <label for="fecha">Fecha</label>
+                    <input type="date" name="fecha" id="fecha" required>
+                </div>
+            </div>
+
+            <div class="two-column">
+                <!-- Hora Inicio (sin flotante) -->
+                <div class="user-box no-floating">
+                    <label for="hora_inicio">Hora Inicio</label>
+                    <input type="time" name="hora_inicio" id="hora_inicio" required>
+                </div>
+                <!-- Hora Fin (sin flotante) -->
+                <div class="user-box no-floating">
+                    <label for="hora_fin">Hora Fin</label>
+                    <input type="time" name="hora_fin" id="hora_fin" required>
+                </div>
+            </div>
+
+            <div class="two-column">
+                <!-- Campus (sin flotante) -->
+                <div class="user-box no-floating select-box">
+                    <label for="select-campus">Campus</label>
+                    <select name="campus" id="select-campus" required>
+                        <option value="">Seleccione un campus</option>
+                        <option value="Norte">Norte</option>
+                        <option value="Sur">Sur</option>
+                        <option value="Externo">Externo</option>
+                    </select>
+                </div>
+
+                <!-- Lugar (sin flotante) -->
+                <div class="user-box no-floating select-box" id="lugar-container">
+                    <label for="select-lugar">Lugar</label>
+                    <select name="lugar" id="select-lugar" style="display:none;"></select>
+                    <input type="text" name="lugar_otro" id="lugar_otro" style="display:none;" placeholder="Especificar otro lugar">
+                </div>
+            </div>
+
+            <!-- Comentario (sin flotante) -->
+            <div class="user-box no-floating textarea-box">
+                <label for="comentario">Comentario</label>
+                <textarea name="comentario" id="comentario"></textarea>
+            </div>
+
+            <!-- Dirección (con flotante) -->
+            <div class="user-box textarea-box">
+                <textarea name="direccion" required></textarea>
+                <label>Dirección</label>
+            </div>
+
+            <!-- Lineamientos (con flotante) -->
+            <div class="user-box textarea-box">
+                <textarea name="lineamientos" required></textarea>
+                <label>Lineamientos</label>
+            </div>
+
+            <!-- Expositor (con flotante) -->
+            <div class="user-box">
+                <input type="text" name="expositor" required>
+                <label>Expositor</label>
+            </div>
+
+            <!-- Botón Submit con animación de borde -->
+            <button type="submit" class="styled-button">
+                <span></span><span></span><span></span><span></span>
+                Guardar
+            </button>
+
+            <button class="styled-button" onclick="ocultarFormulario()">
+                <span></span><span></span><span></span><span></span>
+                Cancelar
+            </button>
+
         </form>
     </div>
 
-<!-- Lista de eventos -->
-<h2>Eventos Existentes</h2>
+    <!-- Lista de eventos -->
+    <h2>Eventos Existentes</h2>
 </div>
+
 <div class="container">
     <ul class="responsive-table">
         <li class="table-header">
@@ -83,12 +163,12 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
         <?php foreach ($eventos as $evento): ?>
             <li class="table-row">
                 <div class="col col-1" data-label="Nombre"><?= htmlspecialchars($evento['nombre']) ?></div>
-                <div class="col col-2" data-label="Tipo"><?= $evento['tipo_evento'] ?></div>
-                <div class="col col-3" data-label="Fecha"><?= $evento['fecha'] ?></div>
-                <div class="col col-4" data-label="Horario"><?= $evento['hora_inicio'] . " - " . $evento['hora_fin'] ?></div>
+                <div class="col col-2" data-label="Tipo"><?= htmlspecialchars($evento['tipo_evento']) ?></div>
+                <div class="col col-3" data-label="Fecha"><?= htmlspecialchars($evento['fecha']) ?></div>
+                <div class="col col-4" data-label="Horario"><?= htmlspecialchars($evento['hora_inicio'] . " - " . $evento['hora_fin']) ?></div>
                 <div class="col col-5" data-label="Lugar"><?= htmlspecialchars($evento['lugar']) ?></div>
                 <div class="col col-6" data-label="Campus"><?= htmlspecialchars($evento['campus']) ?></div>
-                <div class="col col-7" data-label="Capacidad"><?= $evento['capacidad'] ?></div>
+                <div class="col col-7" data-label="Capacidad"><?= htmlspecialchars($evento['capacidad']) ?></div>
                 <div class="col col-8" data-label="Acciones">
                     <button class="Btn" onclick="editarEvento(<?= $evento['id'] ?>)">Edit
                         <svg class="svg" viewBox="0 0 512 512">
@@ -119,13 +199,15 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById("form-evento").reset();
         document.querySelector("[name='id_evento']").value = "";
         document.getElementById("formulario-evento").style.display = "block";
-        document.getElementById("select-lugar").style.display = "none"; // Hide by default
+        document.getElementById("select-lugar").style.display = "none"; // Oculto por defecto
+        document.getElementById("lugar_otro").style.display = "none";
     }
 
     function ocultarFormulario() {
         document.getElementById("formulario-evento").style.display = "none";
     }
 
+    // Al cambiar el campus, cargamos salones o mostramos "otro"
     document.getElementById("select-campus").addEventListener("change", function() {
         let campus = this.value;
         let selectLugar = document.getElementById("select-lugar");
@@ -141,6 +223,8 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
             otroInput.required = false;
             selectLugar.style.display = "block";
             selectLugar.required = true;
+
+            // CORREGIDO: uso de backticks
             fetch(`actions/obtener_salones.php?campus=${campus}`)
                 .then(response => response.json())
                 .then(data => {
@@ -152,15 +236,21 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
         }
     });
 
+    // Al cambiar el lugar, si es "otro", mostramos input
     document.getElementById("select-lugar").addEventListener("change", function() {
         let otroInput = document.getElementById("lugar_otro");
-        otroInput.style.display = (this.value === "otro") ? "block" : "none";
-        otroInput.required = (this.value === "otro");
+        if (this.value === "otro") {
+            otroInput.style.display = "block";
+            otroInput.required = true;
+        } else {
+            otroInput.style.display = "none";
+            otroInput.required = false;
+        }
     });
 
+    // Guardar evento (submit)
     document.getElementById("form-evento").addEventListener("submit", function(e) {
         e.preventDefault();
-
         let formData = new FormData(this);
         let id_evento = formData.get("id_evento");
         let url = id_evento ? "actions/editar_evento.php" : "actions/agregar_evento.php";
@@ -174,7 +264,6 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
                 if (data.debug_query) {
                     alert("Consulta ejecutada:\n" + data.debug_query);
                 }
-
                 if (data.success) {
                     alert(data.success);
                     location.reload();
@@ -185,6 +274,7 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
             .catch(error => console.error("Error en fetch:", error));
     });
 
+    // Editar evento
     function editarEvento(id) {
         let evento = eventos.find(e => e.id == id);
         if (!evento) {
@@ -192,7 +282,6 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
             return;
         }
 
-        // 1. Rellenar los campos generales del formulario
         document.getElementById("titulo-formulario").textContent = "Editar Evento";
         document.querySelector("[name='id_evento']").value = id;
         document.querySelector("[name='nombre']").value = evento.nombre;
@@ -207,73 +296,66 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
         document.querySelector("[name='lineamientos']").value = evento.lineamientos;
         document.querySelector("[name='expositor']").value = evento.expositor;
 
-        // 2. Mostrar el formulario
+        // Mostrar formulario
         document.getElementById("formulario-evento").style.display = "block";
 
-        // 3. Hacer un fetch de los salones para el campus del evento
-        let campus = evento.campus;
+        // Campus externo o no
         let selectLugar = document.getElementById("select-lugar");
         let otroInput = document.getElementById("lugar_otro");
 
-        // Si es "Externo", mostramos directamente el input "otro"
-        if (campus === "Externo") {
-            // Forzamos "lugar_otro" como el lugar si el evento.lugar no está vacío
+        if (evento.campus === "Externo") {
             selectLugar.style.display = "none";
+            selectLugar.required = false;
             otroInput.style.display = "block";
-            otroInput.value = evento.lugar;
             otroInput.required = true;
+            otroInput.value = evento.lugar;
         } else {
-            // Campus es Norte o Sur → cargamos salones desde el backend
-            fetch(`actions/obtener_salones.php?campus=${campus}`)
+            // Cargar salones
+            fetch(`actions/obtener_salones.php?campus=${evento.campus}`)
                 .then(response => response.json())
                 .then(data => {
-                    // 3.1. Rellenar el <select> con las opciones "id_salon - Capacidad X"
                     selectLugar.innerHTML = data.map(salon =>
                         `<option value="${salon.id_salon}">${salon.id_salon} - Capacidad ${salon.capacidad}</option>`
                     ).join('') + '<option value="otro">Otro</option>';
 
                     selectLugar.style.display = "block";
+                    selectLugar.required = true;
                     otroInput.style.display = "none";
                     otroInput.required = false;
 
-                    // 3.2. Verificar si el lugar del evento coincide con alguno de los salones
+                    // Verificar si la opción (salón) está en la lista
                     if (selectLugar.querySelector(`option[value='${evento.lugar}']`)) {
-                        selectLugar.value = evento.lugar; // Seleccionamos el lugar
+                        selectLugar.value = evento.lugar;
                     } else {
-                        // No coincide → es "otro"
+                        // Caso "otro"
                         selectLugar.value = "otro";
                         otroInput.style.display = "block";
-                        otroInput.value = evento.lugar;  // Asignamos el valor "otro" al input
                         otroInput.required = true;
+                        otroInput.value = evento.lugar;
                     }
                 })
                 .catch(error => console.error("Error al obtener salones:", error));
         }
 
-        // 4. Desplazar la vista suavemente hacia el formulario
-        document.getElementById("formulario-evento").scrollIntoView({
-            behavior: "smooth"
-        });
+        // Scroll suave hacia el formulario
+        document.getElementById("formulario-evento").scrollIntoView({ behavior: "smooth" });
     }
 
-
+    // Eliminar evento
     function eliminarEvento(id) {
         if (!confirm("¿Seguro que deseas eliminar este evento?")) {
-            return; // Si el usuario cancela, no hacemos nada
+            return;
         }
-
         fetch("actions/eliminar_evento.php", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ id: id })
         })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
                     alert(data.success);
-                    location.reload(); // Recargamos la página para ver los cambios
+                    location.reload();
                 } else {
                     alert("Error: " + data.error);
                 }
@@ -281,4 +363,6 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
             .catch(error => console.error("Error al eliminar evento:", error));
     }
 
+
+    document.addEventListener('DOMContentLoaded', initFloatingLabels);
 </script>

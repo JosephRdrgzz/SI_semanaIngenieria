@@ -955,21 +955,27 @@ h2 small {
 
 
 /* Contenedor principal del formulario */
+/* Elimina la posición absoluta para que NO se superponga y se muestre en el flujo normal */
+/* From Uiverse.io by glisovic01 */
+/* Ajustamos el formulario al flujo normal (no absolute) */
 .login-box {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 400px;
+    /* Eliminado position absolute y transform para que se inyecte en el flujo normal */
+    /* position: absolute;
+       top: 50%;
+       left: 50%;
+       transform: translate(-50%, -55%); */
+
+    width: 400px;           /* Ancho fijo, ajústalo a tu gusto */
+    max-width: 600px;       /* Ancho máximo */
     padding: 40px;
-    margin: 20px auto;
-    transform: translate(-50%, -55%);
-    background: rgba(0, 0, 0, 0.9);
+    margin: 20px auto;      /* Centra horizontalmente en la página */
+    background: rgba(0,0,0,0.9);
     box-sizing: border-box;
-    box-shadow: 0 15px 25px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 15px 25px rgba(0,0,0,0.6);
     border-radius: 10px;
 }
 
-/* Título del formulario */
+/* Título principal del formulario */
 .login-box p:first-child {
     margin: 0 0 30px;
     padding: 0;
@@ -980,10 +986,10 @@ h2 small {
     letter-spacing: 1px;
 }
 
-/* Contenedores para cada input/field */
+/* user-box: contenedor de cada campo */
 .login-box .user-box {
-    position: relative;
-    margin-bottom: 30px;
+    position: relative;  /* Puedes dejarlo en relative o quitarlo */
+    margin-bottom: 30px; /* Espacio vertical entre campos */
 }
 
 .login-box .user-box input,
@@ -997,40 +1003,25 @@ h2 small {
     border-bottom: 1px solid #fff;
     outline: none;
     background: transparent;
-    resize: none;
+    resize: none; /* Evita que textarea se expanda manualmente */
+    /* Eliminamos la clase has-value o cualquier lógica asociada */
 }
 
-.login-box .user-box textarea {
-    height: 80px;
-}
-
-/* Etiquetas para cada campo */
+/* ---- AQUÍ QUITAMOS EL EFECTO DE LABEL FLOTANTE ---- */
+/* Label normal (ya no flotante) */
 .login-box .user-box label {
-    position: absolute;
-    top: 0;
-    left: 0;
-    padding: 10px 0;
+    display: block;         /* Lo hacemos bloque para que aparezca encima */
+    margin-bottom: 5px;     /* Espacio debajo del label */
     font-size: 16px;
     color: #fff;
-    pointer-events: none;
-    transition: 0.5s;
+    /* Eliminado position: absolute, transition, pointer-events, etc. */
 }
 
-/* Efecto al enfocar o tener contenido */
-.login-box .user-box input:focus ~ label,
-.login-box .user-box input:valid ~ label,
-.login-box .user-box select:focus ~ label,
-.login-box .user-box select:valid ~ label,
-.login-box .user-box textarea:focus ~ label,
-.login-box .user-box textarea:valid ~ label {
-    top: -20px;
-    left: 0;
-    color: #fff;
-    font-size: 12px;
-}
+/* Antes se usaba: input:focus ~ label, etc. -> Se elimina por completo */
 
-/* Botón Submit con animación */
-.login-box form .btn-submit {
+/* Botones con animación de borde */
+/* Botones con animación de borde */
+.login-box form .styled-button {
     position: relative;
     display: inline-block;
     padding: 10px 20px;
@@ -1042,92 +1033,90 @@ h2 small {
     overflow: hidden;
     transition: 0.5s;
     margin-top: 40px;
+    margin-right: 10px; /* Espacio entre botones */
     letter-spacing: 3px;
-    background: transparent;
-    border: 1px solid #fff;
+    border: 1px solid #fff; /* Borde blanco */
     border-radius: 5px;
+    background: transparent;
+    cursor: pointer; /* Añadir cursor pointer para el botón */
 }
 
-.login-box form .btn-submit:hover {
+.login-box form .styled-button:hover {
     background: #fff;
     color: #272727;
     border-radius: 5px;
 }
 
-.login-box form .btn-submit span {
+.login-box .styled-button span {
     position: absolute;
     display: block;
 }
 
-.login-box form .btn-submit span:nth-child(1) {
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 2px;
-    background: linear-gradient(90deg, transparent, #fff);
-    animation: btn-anim1 1.5s linear infinite;
-}
-
+/* Animaciones de las 4 líneas */
 @keyframes btn-anim1 {
     0% { left: -100%; }
-    50%, 100% { left: 100%; }
+    50%,100% { left: 100%; }
 }
 
-.login-box form .btn-submit span:nth-child(2) {
+.login-box .styled-button span:nth-child(2) {
     top: -100%;
     right: 0;
     width: 2px;
     height: 100%;
     background: linear-gradient(180deg, transparent, #fff);
     animation: btn-anim2 1.5s linear infinite;
-    animation-delay: 0.375s;
+    animation-delay: .375s
 }
-
 @keyframes btn-anim2 {
     0% { top: -100%; }
-    50%, 100% { top: 100%; }
+    50%,100% { top: 100%; }
 }
 
-.login-box form .btn-submit span:nth-child(3) {
+.login-box .styled-button span:nth-child(3) {
     bottom: 0;
     right: -100%;
     width: 100%;
     height: 2px;
     background: linear-gradient(270deg, transparent, #fff);
     animation: btn-anim3 1.5s linear infinite;
-    animation-delay: 0.75s;
+    animation-delay: .75s
 }
-
 @keyframes btn-anim3 {
     0% { right: -100%; }
-    50%, 100% { right: 100%; }
+    50%,100% { right: 100%; }
 }
 
-.login-box form .btn-submit span:nth-child(4) {
+.login-box .styled-button span:nth-child(4) {
     bottom: -100%;
     left: 0;
     width: 2px;
     height: 100%;
     background: linear-gradient(360deg, transparent, #fff);
     animation: btn-anim4 1.5s linear infinite;
-    animation-delay: 1.125s;
+    animation-delay: 1.125s
 }
-
 @keyframes btn-anim4 {
     0% { bottom: -100%; }
-    50%, 100% { bottom: 100%; }
+    50%,100% { bottom: 100%; }
 }
-
-/* Botón Cancelar */
-.login-box form .btn-cancel {
-    display: inline-block;
-    margin-top: 20px;
-    color: #fff;
-    text-decoration: none;
-    font-size: 14px;
-    transition: 0.3s;
-}
-
-.login-box form .btn-cancel:hover {
+/* Estilo para el texto de error, si lo deseas, o mensajes */
+.login-box p:last-child {
     color: #aaa;
+    font-size: 14px;
+}
+
+/* Para iconos date/time en Chrome */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1) brightness(2);
+}
+
+/* Dos columnas para filas de campos */
+.two-column {
+    display: flex;
+    flex-wrap: wrap;  /* Permite que en pantallas pequeñas se apilen */
+    gap: 20px;        /* Espacio horizontal entre columnas */
+}
+.two-column .user-box {
+    flex: 1 1 45%;    /* Cada campo ocupa ~45% del contenedor */
 }
