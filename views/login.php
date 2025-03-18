@@ -13,34 +13,75 @@ unset($_SESSION['error']); // Borrar error tras mostrarlo
 
 ?>
 
-<h2>Iniciar Sesión</h2>
-<?php if (!empty($error)): ?>
-    <p style="color:red;"><?= htmlspecialchars($error) ?></p>
-<?php endif; ?>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- css y script de materialize -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <!-- iconos de google -->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- titulo -->
+</head>
 
-<form method="POST" action="actions/login.php">
-    <label>Expediente:</label>
-    <input type="text" name="exp" id="exp" required><br>
+<style type="text/css">
+    .orange { background-color: #FF5900 !important; }
+    form {border-radius: 4px !important;}
+    button.sub {margin-top: 2rem;}
+    .space { margin-top: 7vh; }
+</style>
+<body>
+<div class="space"></div>
 
-    <input type="submit" value="Ingresar">
-</form>
+<!-- titulo -->
+<div class="container">
+    <div class="row">
+        <div class="col s12 center">
+            <h2>Semana de La Ingeniería</h2>
+        </div>
+    </div>
+</div>
 
-<script>
-    document.getElementById("exp").addEventListener("blur", function () {
-        let exp = this.value.trim();
-        if (exp !== "") {
-            fetch("actions/verificar_admin.php?exp=" + exp)
-                .then(response => response.json())
-                .then(data => {
-                    let passwordContainer = document.getElementById("password-container");
-                    if (data.es_admin) {
-                        passwordContainer.style.display = "block";
-                        document.getElementById("password-field").setAttribute("required", "true");
-                    } else {
-                        passwordContainer.style.display = "none";
-                        document.getElementById("password-field").removeAttribute("required");
-                    }
-                });
-        }
-    });
-</script>
+<!-- login -->
+<div class="container">
+    <div class="row">
+        <form class="col m8 offset-m2 s12 grey darken-3 z-depth-1 white-text" method="POST" action="actions/login.php">
+            <div class="row">
+                <div class="col s12 center">
+                    <h3>Iniciar Sesión</h3>
+                </div>
+            </div>
+            <?php if (!empty($error)): ?>
+                <div class="row">
+                    <div class="col s12 center">
+                        <p style="color:red;"><?= htmlspecialchars($error) ?></p>
+                    </div>
+                </div>
+            <?php endif; ?>
+            <div class="row">
+                <div class="input-field col m8 offset-m2 s10 offset-s1">
+                    <input placeholder="ID con ceros" id="exp" type="text" name="exp" class="white-text validate" required>
+                    <label for="exp">Matrícula</label>
+                </div>
+            </div>
+            <div class="row" id="password-container" style="display: none;">
+                <div class="input-field col m8 offset-m2 s10 offset-s1">
+                    <input placeholder="Ingresa tu password" id="password-field" type="password" name="password" class="white-text validate">
+                    <label for="password-field">Contraseña</label>
+                </div>
+            </div>
+            <div class="row">
+                <div class="container">
+                    <div class="col offset-s1 s10 right-align">
+                        <button class="sub orange btn waves-effect waves-light" type="submit" name="action">Iniciar Sesión
+                            <i class="material-icons right">send</i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+</body>

@@ -49,21 +49,21 @@ document.addEventListener("DOMContentLoaded", function () {
                         const card = document.createElement("div");
                         card.classList.add("card");
                         card.innerHTML = `
-                            <div class="img">
-                                <div class="save">
-                                    <input type="checkbox" name="eventos" value="${evento.id}" class="svg">
-                                </div>
+                        <div class="img">
+                            <div class="save">
+                                <input type="checkbox" name="eventos" value="${evento.id}" class="svg">
                             </div>
-                            <div class="text">
-                                <h3 class="h3">${evento.nombre}</h3>
-                                <p class="p"><strong>Fecha:</strong> ${evento.fecha}</p>
-                                <p class="p"><strong>Horario:</strong> ${evento.hora_inicio} - ${evento.hora_fin}</p>
-                                <p class="p"><strong>Lugar:</strong> ${evento.lugar}</p>
-                                <p class="p"><strong>Campus:</strong> ${evento.campus}</p>
-                                <p class="p"><strong>Tipo:</strong> ${evento.tipo_evento}</p>
-                            </div>
-                            <button class="info-button">Más Información</button>
-                        `;
+                        </div>
+                        <div class="text">
+                            <h3 class="h3">${evento.nombre}</h3>
+                            <p class="p"><strong>Fecha:</strong> ${evento.fecha}</p>
+                            <p class="p"><strong>Horario:</strong> ${evento.hora_inicio} - ${evento.hora_fin}</p>
+                            <p class="p"><strong>Lugar:</strong> ${evento.lugar}</p>
+                            <p class="p"><strong>Campus:</strong> ${evento.campus}</p>
+                            <p class="p"><strong>Tipo:</strong> ${evento.tipo_evento}</p>
+                        </div>
+                        <a href="index.php?view=detalles_evento&id=${evento.id}" class="info-button">Más Información</a>
+                    `;
                         contenedorEventos.appendChild(card);
                     }
                 });
@@ -97,6 +97,7 @@ document.addEventListener("DOMContentLoaded", function () {
             checkbox.addEventListener("change", actualizarBotonInscripcion);
         });
     }
+
 
     formInscripcion.addEventListener("submit", function (e) {
         e.preventDefault();

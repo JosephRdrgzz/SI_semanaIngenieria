@@ -50,6 +50,14 @@ switch ($view) {
             exit();
         }
         break;
+    case 'gestionar_usuarios':
+        if ($_SESSION['tipo_usuario'] === 'admin') {
+            require 'views/gestionar_usuarios.php';
+        } else {
+            header("Location: index.php?view=home");
+            exit();
+        }
+        break;
 
     default:
         require "views/$view.php";

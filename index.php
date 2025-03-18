@@ -51,6 +51,16 @@ switch ($view) {
         }
         break;
 
+    case 'editar':
+        if ($_SESSION['tipo_usuario'] === 'admin') {
+            require 'views/editar.php';
+        } else {
+            header("Location: index.php?view=home");
+            exit();
+        }
+        break;
+
+
     default:
         require "views/$view.php";
         break;

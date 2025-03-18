@@ -1,22 +1,19 @@
 body {
-    min-height: 100vh; /* Ensure the body covers at least 100% of the viewport */
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
 #contenido {
-    flex: 1; /* Ensure the content covers the remaining height */
-    background: #2b2a29;
+    flex: 1;
 }
 
-/* Container for consistent width */
 .container {
     max-width: 1200px;
     width: 100%;
     margin: 0 auto;
 }
 
-/* Apply the container class to header, navbar, and footer */
 #header, #navbar, #footer {
     width: 100%;
 }
@@ -26,30 +23,28 @@ body {
 }
 
 #titulo {
-    background: rgba(255, 255, 255, 0.85); /* Semi-transparent white background for readability */
+    background: rgba(255, 255, 255, 0.85);
     padding: 20px;
     border-radius: 10px;
     max-width: 1000px;
     margin: 20px auto;
     text-align: justify;
-    color: black; /* Ensure the text is readable */
+    color: black;
     font-size: 24px;
     font-weight: bold;
     margin-top: 20px;
 }
 
-/* Adjust the text within the content */
 .contenido {
-    background: rgba(255, 255, 255, 0.85); /* Semi-transparent white background for readability */
+    background: rgba(255, 255, 255, 0.85);
     padding: 20px;
     border-radius: 10px;
     max-width: 1000px;
     margin: 20px auto;
     text-align: justify;
-    color: black; /* Ensure the text is readable */
+    color: black;
 }
 
-/* Ensure the footer covers the width */
 #footer {
     background: #333;
     color: white;
@@ -64,36 +59,108 @@ a {
     margin: 10px;
 }
 
-/* Navbar styles */
-/* Navbar styles */
-.nav {
+/*
+   FONDO DEGRADADO A PANTALLA COMPLETA
+   ----------------------------------
+   .my-navbar abarca el 100% del ancho y tiene un gradiente
+   morado-rosa (puedes ajustar los colores a tu gusto).
+*/
+.my-navbar {
     width: 100%;
     background: linear-gradient(#e66465, #9198e5);
-    padding: 10px 0;
+    padding: 10px 0; /* Espacio vertical arriba y abajo */
 }
 
-.nav .container {
+/*
+   CONTENEDOR CENTRADO
+   ----------------------------------
+   .my-navbar-container es un rectángulo blanco centrado,
+   con un ancho máximo para que no ocupe todo el viewport.
+   Ajusta max-width si deseas que sea más o menos ancho.
+*/
+.my-navbar .my-navbar-container {
+    max-width: 1200px;
+    margin: 0 auto;      /* Centra horizontalmente */
+    background: #ffffff; /* Fondo blanco */
+    border-radius: 10px;
+    padding: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+
+/* BOTÓN HAMBURGUESA (solo para mobile) */
+.my-hamburger {
+    display: none;       /* Oculto en desktop */
+    font-size: 30px;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/*
+   ENLACES DEL MENÚ
+   ----------------------------------
+   .my-navbar-links es el contenedor de los enlaces.
+*/
+.my-navbar-links {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+/*
+   ESTILO DE CADA ENLACE
+   ----------------------------------
+   Añadimos un "pipe" al final de cada enlace, excepto en el último.
+*/
+/* My Navbar styles */
+.my-navbar {
+    width: 100%;
+    background: linear-gradient(#e66465, #9198e5); /* Fondo degradado a lo ancho */
+    padding: 10px 0;
+    font-family: "Arial", sans-serif !important; /* Forzar fuente en la navbar */
+}
+
+/* Rectángulo blanco que crece según el contenido */
+.my-navbar .my-navbar-container {
+    box-sizing: border-box;
+    display: flex;
+    flex-wrap: nowrap;              /* Mantiene todo en una sola línea */
+    align-items: center;
+    justify-content: space-between;
     background: #ffffff;
     border-radius: 10px;
-    padding: 10px;
+    padding: 10px 20px;
+
+    /* El contenedor se ajusta al ancho del contenido,
+       pero no excede la pantalla sin permitir scroll */
+    width: fit-content;
+    max-width: 100%;               /* Evita que se salga de la pantalla */
+    margin: 0 auto;                /* Centra horizontalmente si hay espacio */
+    overflow-x: auto;              /* Muestra scroll horizontal si el contenido es muy ancho */
 }
 
-.nav .btn {
+/* Estilo base de los botones en la navbar */
+.my-navbar .my-navbar-btn {
     padding: 10px 20px;
-    color: black;
     text-decoration: none;
     text-align: center;
+    color: black !important;
+    /* Permitir que el texto se parta en varias líneas si es muy largo */
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;/* Evita que las palabras se partan en varias líneas */
 }
 
-.nav .btn:hover {
+/* Hover de los botones */
+.my-navbar .my-navbar-btn:hover {
     color: #e66465;
     transform: scale(1.1) rotate(10deg);
 }
 
-.hamburger {
+/* Botón hamburguesa en dispositivos móviles */
+.my-hamburger {
     display: none;
     font-size: 30px;
     background: none;
@@ -101,30 +168,33 @@ a {
     cursor: pointer;
 }
 
-.nav-links {
+/* Contenedor de enlaces de la navbar */
+.my-navbar-links {
     display: flex;
     justify-content: space-around;
     align-items: center;
 }
 
+/* Media query para pantallas pequeñas */
 @media (max-width: 768px) {
-    .hamburger {
+    .my-hamburger {
         display: block;
     }
 
-    .nav-links {
+    .my-navbar-links {
         display: none;
         flex-direction: column;
         width: 100%;
     }
 
-    .nav-links a {
+    .my-navbar-links a {
         padding: 10px;
         width: 100%;
         text-align: center;
+        white-space: normal; /* Permite que en móvil sí se parta el texto si es muy largo */
     }
 
-    .nav-links.active {
+    .my-navbar-links.active {
         display: flex;
     }
 }
