@@ -29,9 +29,6 @@ switch ($view) {
         require 'views/login.php';
         break;
 
-    case 'completar_perfil':
-        require 'views/completar_perfil.php';
-        break;
 
     case 'panel_admin': // Agregar la vista del panel de administrador
         if ($_SESSION['tipo_usuario'] === 'admin') {

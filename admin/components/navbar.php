@@ -9,18 +9,19 @@
 
         <!-- Menú horizontal (pantallas grandes) -->
         <nav class="my-navbar-links" id="navbarLinks">
-            <a class="my-navbar-btn" href="index.php?view=panel_admin">INICIO</a>
-            <a class="my-navbar-btn" href="index.php?view=generalidades">GENERALIDADES</a>
-            <a class="my-navbar-btn" href="index.php?view=concursos">CONCURSOS</a>
-            <a class="my-navbar-btn" href="index.php?view=contacto">CONTACTO</a>
+
 
             <?php if (isset($_SESSION['id_usuario'])): ?>
                 <?php if ($_SESSION['tipo_usuario'] === 'admin'): ?>
+                    <a class="my-navbar-btn" href="index.php?view=panel_admin">PANEL</a>
+                    <a class="my-navbar-btn" href="index.php?view=editar_home">INICIO (EDITAR)</a>
+                    <a class="my-navbar-btn" href="index.php?view=generalidades">GENERALIDADES</a>
+                    <a class="my-navbar-btn" href="index.php?view=concursos">CONCURSOS</a>
+                    <a class="my-navbar-btn" href="index.php?view=contacto">CONTACTO</a>
                     <a class="my-navbar-btn" href="index.php?view=gestionar_eventos">GESTIONAR EVENTOS</a>
                     <a class="my-navbar-btn" href="index.php?view=gestionar_usuarios">GESTIONAR USUARIOS</a>
                 <?php else: ?>
-                    <a class="my-navbar-btn" href="index.php?view=eventos">EVENTOS</a>
-                    <a class="my-navbar-btn" href="index.php?view=mis_eventos">Mis Eventos</a>
+
                     <a class="my-navbar-btn" href="index.php?view=editar_perfil&exp=<?= $_SESSION['usuario']['exp'] ?>">
                         <?= $_SESSION['usuario']['nombre'] ?>
                     </a>

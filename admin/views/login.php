@@ -26,17 +26,14 @@ unset($_SESSION['error']); // Borrar error tras mostrarlo
             </div>
             <div id="input-area">
                 <div class="form-inp">
-                    <input placeholder="Email Address" type="text" name="exp" required>
+                    <input placeholder="ID usuario" type="text" name="exp" required>
                 </div>
                 <div class="form-inp">
-                    <input placeholder="Password" type="password" name="contraseña" required>
+                    <input placeholder="Contraseña" type="password" name="contraseña" required>
                 </div>
             </div>
             <div id="submit-button-cvr">
                 <button id="submit-button" type="submit">Login</button>
-            </div>
-            <div id="forgot-pass">
-                <a href="#">Forgot password?</a>
             </div>
             <div id="bar"></div>
         </div>

@@ -19,18 +19,22 @@ if (!isset(\$_SESSION['id_usuario'])) {
 // Ruta al archivo de vista que se desea editar
 $archivoVista = __DIR__ . '/../../views/generalidades.php';
 
-// Si se envía el formulario, guardar el contenido
+$message = null; // Variable para mostrar mensajes en la misma página
+
+// Si llega contenido por POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['contenido'])) {
     $contenido = $_POST['contenido'];
 
-    // Se guarda el archivo con el encabezado obligatorio siempre al inicio
-    $contenidoAGuardar = $headerSnippet . $contenido;
+    // Envuelves el contenido que se guardará en un contenedor centrado
+    $contenidoAGuardar = $headerSnippet
+        . '<div style="max-width: 800px; margin: 0 auto; padding: 20px;">'
+        . $contenido
+        . '</div>';
+
     if (file_put_contents($archivoVista, $contenidoAGuardar) !== false) {
-        header("Location: index.php?view=editar&message=success"); // Redirige correctamente
-        exit();
+        $message = 'success'; // Se guardó correctamente
     } else {
-        header("Location: index.php?view=editar&message=error");
-        exit();
+        $message = 'error'; // Ocurrió un problema al guardar
     }
 }
 
@@ -38,9 +42,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['contenido'])) {
 $contenidoActual = '';
 if (file_exists($archivoVista)) {
     $contenidoActual = file_get_contents($archivoVista);
-    // Si el contenido empieza con el header, lo removemos para editar solo el contenido principal
+    // Remover el header obligatorio
     if (strpos($contenidoActual, $headerSnippet) === 0) {
         $contenidoActual = substr($contenidoActual, strlen($headerSnippet));
+    }
+    // Remover el contenedor centrado si está presente
+    $wrapperStart = '<div style="max-width: 800px; margin: 0 auto; padding: 20px;">';
+    $wrapperEnd   = '</div>';
+
+    if (
+        strpos($contenidoActual, $wrapperStart) === 0 &&
+        substr(trim($contenidoActual), -strlen($wrapperEnd)) === $wrapperEnd
+    ) {
+        $contenidoActual = substr($contenidoActual, strlen($wrapperStart), -strlen($wrapperEnd));
     }
 }
 ?>
@@ -92,14 +106,15 @@ if (file_exists($archivoVista)) {
 <div class="edit-view-editor">
     <h2>Editar Contenido de Generalidades</h2>
 
-    <?php if (isset($_GET['message'])): ?>
-        <div class="message">
-            <?= $_GET['message'] === 'success' ? 'Contenido actualizado correctamente.' : 'Error al actualizar el contenido.' ?>
-        </div>
+    <!-- Mostrar mensaje de éxito o error -->
+    <?php if ($message === 'success'): ?>
+        <div class="message">Contenido actualizado correctamente.</div>
+    <?php elseif ($message === 'error'): ?>
+        <div class="message">Error al actualizar el contenido.</div>
     <?php endif; ?>
 
     <!-- Formulario para guardar el contenido -->
-    <form id="edit-form" action="index.php?view=editar" method="post">
+    <form id="edit-form" action="" method="post">
         <div id="editor-container">
             <!-- Contenedor del editor -->
             <div id="editor" style="height: 300px;"></div>
