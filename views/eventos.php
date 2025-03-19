@@ -26,7 +26,7 @@ if (!isset($_SESSION['id_usuario'])) {
     <label for="filtro-tipo">Filtrar por Tipo de Evento:</label>
     <select id="filtro-tipo">
         <option value="">Todos</option>
-        <!-- Options will be populated by JavaScript -->
+        <!-- Options se llenarán dinámicamente con JavaScript -->
     </select>
 
     <!-- Botón para limpiar filtros -->
@@ -36,15 +36,31 @@ if (!isset($_SESSION['id_usuario'])) {
 <!-- Contenedor de eventos -->
 <div id="contenedor-eventos"></div>
 
-<!-- Formulario de inscripción -->
-<form id="form-inscripcion" style="position: fixed; bottom: 20px; right: 20px; display: none;">
-    <button type="submit">
-        <span class="text">Inscribirse</span>
-        <span class="blob"></span>
-        <span class="blob"></span>
-        <span class="blob"></span>
-        <span class="blob"></span>
-    </button>
-</form>
+<!-- Carrito flotante de eventos seleccionados -->
+<div id="carrito-eventos" style="
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: none; /* Por defecto oculto */
+    max-width: 300px;
+    background: #fff;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+    z-index: 9999;
+">
+    <h3 style="margin-top: 0;">Eventos seleccionados</h3>
+    <ul id="lista-eventos-seleccionados" style="list-style: disc; padding-left: 20px; margin: 0;"></ul>
 
+    <!-- Formulario de inscripción dentro del carrito -->
+    <form id="form-inscripcion" style="margin-top: 10px;">
+        <button type="submit" style="width: 100%; background-color: orange;">
+            <span class="text">Inscribirse</span>
+            <!-- Tus elementos .blob, etc., si los deseas -->
+        </button>
+    </form>
+</div>
+
+<!-- Carga tu archivo JavaScript al final -->
 <script src="scripts/eventos.js"></script>
