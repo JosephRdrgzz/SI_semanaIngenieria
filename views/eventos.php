@@ -6,6 +6,7 @@ if (!isset($_SESSION['id_usuario'])) {
 ?>
 
 <h2 style="text-align: center;">Eventos Disponibles</h2>
+<p style="text-align: center;">Para inscribirte a un evento, selecciona los eventos que te interesen marcando las casillas correspondientes y luego haz clic en el botón "Inscribirse" en el carrito de eventos seleccionados.</p>
 
 <!-- Botón para mostrar/ocultar filtros -->
 <button id="toggle-filters" style="display: block; margin: 0 auto;">Mostrar Filtros</button>
