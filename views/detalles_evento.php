@@ -17,8 +17,13 @@ if (!$evento) {
 }
 
 // Contar el número de personas inscritas en el campo asistencia
-$asistencia = json_decode($evento['asistencia'], true);
+// Si el campo está vacío, usaremos '[]' para que json_decode devuelva un array vacío
+$asistencia = $evento['asistencia'] ? json_decode($evento['asistencia'], true) : [];
+if (!is_array($asistencia)) {
+    $asistencia = [];
+}
 $num_inscritos = count($asistencia);
+
 ?>
 
 <!DOCTYPE html>
@@ -32,6 +37,11 @@ $num_inscritos = count($asistencia);
     <!-- Material Icons -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
+        nav {
+            all: revert;  /* O 'all: unset;' */
+            /* Vuelve a estilos por defecto del navegador */
+        }
+
         /* Estilos específicos para la sección de detalles del evento */
         .evento-detalles .evento-header {
             padding: 40px 0 30px 0;

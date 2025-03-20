@@ -56,11 +56,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
     <?php endif; ?>
 
     <form class="form" action="index.php?view=gestionar_usuarios" method="post" enctype="multipart/form-data">
-        <span class="form-title">Upload your file</span>
-        <p class="form-paragraph">File should be a CSV</p>
+        <span class="form-title">Carga tu archivo</span>
+        <p class="form-paragraph">El archivo debe ser CSV</p>
 
         <label for="file-input" class="drop-container">
-            <span class="drop-title">Drop files here</span>
+            <span class="drop-title">Inserta el archivo aquí</span>
             or
             <input type="file" name="file" accept=".csv" required id="file-input">
         </label>

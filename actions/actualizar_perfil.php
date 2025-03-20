@@ -10,8 +10,16 @@ if (!isset($_SESSION['usuario'])) {
 $exp = $_SESSION['usuario']['exp'];
 
 // Validar los datos antes de actualizar
-$mail = filter_var($_POST['mail'], FILTER_VALIDATE_EMAIL);
-$campus = in_array($_POST['campus'], ['Norte', 'Sur']) ? $_POST['campus'] : null;
+$parteUsuario = $_POST['mail']; // "usuario"
+$mailCompleto = $parteUsuario . '@anahuac.mx'; // "usuario@anahuac.mx"
+
+$mail = filter_var($mailCompleto, FILTER_VALIDATE_EMAIL);
+if (!$mail) {
+    // error
+    $_SESSION['error'] = "Email inválido.";
+    header("Location: ../index.php?view=completar_perfil");
+    exit();
+}$campus = in_array($_POST['campus'], ['Norte', 'Sur']) ? $_POST['campus'] : null;
 $semestre = filter_var($_POST['semestre'], FILTER_VALIDATE_INT, ["options" => ["min_range" => 1, "max_range" => 12]]);
 $celular = preg_match('/^\d{10}$/', $_POST['celular']) ? $_POST['celular'] : null;
 $telefono = preg_match('/^\d{10}$/', $_POST['telefono']) ? $_POST['telefono'] : null;
