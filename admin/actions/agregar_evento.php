@@ -15,11 +15,12 @@ $nombre = $_POST['nombre'] ?? null;
 $tipo_evento = $_POST['tipo_evento'] ?? null;
 
 // Validar que el tipo de evento es uno de los permitidos
-$tipos_permitidos = ['Taller', 'Exposición', 'Competencia', 'Oportunidad Laboral'];
+$tipos_permitidos = ['Taller', 'Exposición', 'Concurso', 'Conferencia','Oportunidad Laboral'];
 if (!in_array($tipo_evento, $tipos_permitidos)) {
     echo json_encode(["error" => "Tipo de evento no válido"]);
     exit();
 }
+
 $capacidad = $_POST['capacidad'] ?? null;
 $fecha = $_POST['fecha'] ?? null;
 $hora_inicio = $_POST['hora_inicio'] ?? null;
@@ -43,20 +44,19 @@ if (!$nombre || !$capacidad || !$fecha || !$hora_inicio || !$hora_fin || !$lugar
     exit();
 }
 
-// **Validar que la hora de inicio sea menor que la de fin**
+// Validar que la hora de inicio sea menor que la de fin
 if (strtotime($hora_fin) <= strtotime($hora_inicio)) {
     echo json_encode(["error" => "La hora de inicio debe ser menor que la hora de fin"]);
     exit();
 }
 
-// **Verificar si hay traslapes en el mismo salón**
+// Verificar traslapes en el mismo salón (solo si no es Externo)
 try {
     $query = "SELECT nombre, fecha, hora_inicio, hora_fin FROM evento 
               WHERE lugar = :lugar 
               AND campus = :campus 
               AND fecha = :fecha 
               AND (hora_inicio::time, hora_fin::time) OVERLAPS (:hora_inicio::time, :hora_fin::time)";
-
     $stmt = $pdo->prepare($query);
     $stmt->execute([
         'lugar' => $lugar,
@@ -65,7 +65,6 @@ try {
         'hora_inicio' => $hora_inicio,
         'hora_fin' => $hora_fin
     ]);
-
     $traslapes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if (!empty($traslapes)) {
@@ -75,29 +74,30 @@ try {
         ]);
         exit();
     }
-
 } catch (Exception $e) {
     echo json_encode(["error" => "Error al verificar traslapes: " . $e->getMessage()]);
     exit();
 }
 
-// **Validar capacidad del salón**
-try {
-    $queryCapacidad = "SELECT capacidad FROM salones WHERE id_salon = :lugar";
-    $stmtCapacidad = $pdo->prepare($queryCapacidad);
-    $stmtCapacidad->execute(['lugar' => $lugar]);
-    $salon = $stmtCapacidad->fetch(PDO::FETCH_ASSOC);
+// Validar capacidad del salón solo si NO es Externo
+if ($campus !== 'Externo') {
+    try {
+        $queryCapacidad = "SELECT capacidad FROM salones WHERE id_salon = :lugar";
+        $stmtCapacidad = $pdo->prepare($queryCapacidad);
+        $stmtCapacidad->execute(['lugar' => $lugar]);
+        $salon = $stmtCapacidad->fetch(PDO::FETCH_ASSOC);
 
-    if ($salon && $capacidad > $salon['capacidad']) {
-        echo json_encode(["error" => "La capacidad del evento ($capacidad) excede el límite del salón ($salon[capacidad])."]);
+        if ($salon && $capacidad > $salon['capacidad']) {
+            echo json_encode(["error" => "La capacidad del evento ($capacidad) excede el límite del salón ($salon[capacidad])."]);
+            exit();
+        }
+    } catch (Exception $e) {
+        echo json_encode(["error" => "Error al validar capacidad del salón: " . $e->getMessage()]);
         exit();
     }
-} catch (Exception $e) {
-    echo json_encode(["error" => "Error al validar capacidad del salón: " . $e->getMessage()]);
-    exit();
 }
 
-// **Insertar evento en la base de datos**
+// Insertar evento en la base de datos
 try {
     $pdo->beginTransaction();
 
@@ -127,4 +127,3 @@ try {
     $pdo->rollBack();
     echo json_encode(["error" => "Error al agregar evento: " . $e->getMessage()]);
 }
-?>

@@ -28,7 +28,7 @@ $lineamientos = $_POST['lineamientos'] ?? null;
 $expositor = $_POST['expositor'] ?? null;
 
 // Validar que el tipo de evento es uno de los permitidos
-$tipos_permitidos = ['Taller', 'Exposición', 'Competencia', 'Oportunidad Laboral'];
+$tipos_permitidos = ['Taller', 'Exposición', 'Concurso', 'Conferencia','Oportunidad Laboral'];
 if (!in_array($tipo_evento, $tipos_permitidos)) {
     echo json_encode(["error" => "Tipo de evento no válido"]);
     exit();

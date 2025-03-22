@@ -54,7 +54,8 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
                         <option value="">Seleccione un tipo</option>
                         <option value="Taller">Taller</option>
                         <option value="Exposición">Exposición</option>
-                        <option value="Competencia">Competencia</option>
+                        <option value="Concurso">Concurso</option>
+                        <option value="Conferencia">Conferencia</option>
                         <option value="Oportunidad Laboral">Oportunidad Laboral</option>
                     </select>
                 </div>
@@ -214,23 +215,37 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
         let otroInput = document.getElementById("lugar_otro");
 
         if (campus === "Externo") {
-            otroInput.style.display = "block";
-            otroInput.required = true;
+            // Forzamos a que el select no tenga salones previos
+            selectLugar.innerHTML = '<option value="otro" selected>Otro</option>';
             selectLugar.style.display = "none";
             selectLugar.required = false;
+
+            // Mostramos y requerimos el input "lugar_otro"
+            otroInput.style.display = "block";
+            otroInput.required = true;
+            otroInput.value = ""; // Limpia el valor anterior si lo hubiera
         } else {
+            // Ocultamos el input "lugar_otro"
             otroInput.style.display = "none";
             otroInput.required = false;
+            otroInput.value = "";
+
+            // Mostramos el select y lo marcamos como requerido
             selectLugar.style.display = "block";
             selectLugar.required = true;
 
-            // CORREGIDO: uso de backticks
+            // Cargamos salones vía fetch
             fetch(`actions/obtener_salones.php?campus=${campus}`)
                 .then(response => response.json())
                 .then(data => {
-                    selectLugar.innerHTML = data.map(salon =>
+                    // Creamos opciones a partir de los salones
+                    let opciones = data.map(salon =>
                         `<option value="${salon.id_salon}">${salon.id_salon} - Capacidad ${salon.capacidad}</option>`
-                    ).join('') + '<option value="otro">Otro</option>';
+                    );
+                    // Agregamos la opción "otro" al final
+                    opciones.push('<option value="otro">Otro</option>');
+                    // Asignamos al select
+                    selectLugar.innerHTML = opciones.join('');
                 })
                 .catch(error => console.error("Error al obtener salones:", error));
         }
@@ -242,9 +257,11 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
         if (this.value === "otro") {
             otroInput.style.display = "block";
             otroInput.required = true;
+            otroInput.value = ""; // Limpia en caso de re-seleccionar
         } else {
             otroInput.style.display = "none";
             otroInput.required = false;
+            otroInput.value = "";
         }
     });
 

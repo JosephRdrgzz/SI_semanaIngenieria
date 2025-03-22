@@ -26,7 +26,6 @@
                     <div class="my-navbar-dropdown-content">
                         <a href="index.php?view=editar_home">INICIO (EDITAR)</a>
                         <a href="index.php?view=generalidades">GENERALIDADES</a>
-                        <a href="index.php?view=concursos">CONCURSOS</a>
                         <a href="index.php?view=contacto">CONTACTO</a>
                     </div>
                 </div>
@@ -61,7 +60,6 @@
             <!-- Items del submenú en desktop se muestran en lista normal en móvil -->
             <a class="my-overlay-link" href="index.php?view=editar_home">INICIO (EDITAR)</a>
             <a class="my-overlay-link" href="index.php?view=generalidades">GENERALIDADES</a>
-            <a class="my-overlay-link" href="index.php?view=concursos">CONCURSOS</a>
             <a class="my-overlay-link" href="index.php?view=contacto">CONTACTO</a>
             <a class="my-overlay-link" href="index.php?view=gestionar_eventos">GESTIONAR EVENTOS</a>
             <a class="my-overlay-link" href="index.php?view=gestionar_usuarios">GESTIONAR USUARIOS</a>
