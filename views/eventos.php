@@ -6,7 +6,10 @@ if (!isset($_SESSION['id_usuario'])) {
 ?>
 
 <h2 style="text-align: center;">Eventos Disponibles</h2>
-<p style="text-align: center;">Para inscribirte a un evento, selecciona los eventos que te interesen marcando las casillas correspondientes y luego haz clic en el botón "Inscribirse" en el carrito de eventos seleccionados.</p>
+<p style="text-align: center;">
+    Para inscribirte a un evento, selecciona los eventos que te interesen marcando las casillas correspondientes
+    y luego haz clic en el botón "Inscribirse" en el carrito de eventos seleccionados.
+</p>
 
 <!-- Botón para mostrar/ocultar filtros -->
 <button id="toggle-filters" style="display: block; margin: 0 auto;">Mostrar Filtros</button>
@@ -42,7 +45,7 @@ if (!isset($_SESSION['id_usuario'])) {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    display: none; /* Por defecto oculto */
+    display: none;
     max-width: 300px;
     background: #fff;
     border: 1px solid #ccc;
@@ -58,10 +61,9 @@ if (!isset($_SESSION['id_usuario'])) {
     <form id="form-inscripcion" style="margin-top: 10px;">
         <button type="submit" style="width: 100%; background-color: orange;">
             <span class="text">Inscribirse</span>
-            <!-- Tus elementos .blob, etc., si los deseas -->
         </button>
     </form>
 </div>
 
-<!-- Carga tu archivo JavaScript al final -->
+<!-- Carga el archivo JavaScript de eventos -->
 <script src="scripts/eventos.js"></script>

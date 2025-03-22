@@ -11,7 +11,7 @@ $exp = $_SESSION['usuario']['exp'];
 $evento_id = json_decode(file_get_contents("php://input"), true)['evento_id'] ?? null;
 
 try {
-    // Primero, obtenemos la asistencia actual
+    // Obtener la asistencia actual
     $query = "SELECT asistencia FROM evento WHERE id = :id";
     $stmt = $pdo->prepare($query);
     $stmt->execute(['id' => $evento_id]);
@@ -22,18 +22,27 @@ try {
         exit();
     }
 
+    // Decodificar asistencia; se espera un objeto asociativo
     $asistencia_actual = json_decode($evento['asistencia'], true);
+    if (!is_array($asistencia_actual)) {
+        $asistencia_actual = [];
+    }
 
-    // Filtrar la asistencia para remover al usuario
-    $nueva_asistencia = array_filter($asistencia_actual, function ($asistente) use ($exp) {
-        return $asistente['exp'] !== $exp;
-    });
+    // Remover la clave del alumno (cancelar la inscripción)
+    if (isset($asistencia_actual[$exp])) {
+        unset($asistencia_actual[$exp]);
+    }
 
-    // Convertir de nuevo a JSONB y actualizar la base de datos
-    $query = "UPDATE evento SET asistencia = :nueva_asistencia, capacidad = capacidad + 1 WHERE id = :id AND fecha > NOW()";
+    // Si no queda ningún inscrito, forzamos que sea un objeto vacío (no un arreglo vacío)
+    if (empty($asistencia_actual)) {
+        $asistencia_actual = new stdClass();
+    }
+
+    // Actualizar la asistencia en la BD sin modificar la capacidad
+    $query = "UPDATE evento SET asistencia = :nueva_asistencia WHERE id = :id AND fecha > NOW()";
     $stmt = $pdo->prepare($query);
     $stmt->execute([
-        'nueva_asistencia' => json_encode(array_values($nueva_asistencia)), // Se usa `array_values` para reindexar el array
+        'nueva_asistencia' => json_encode($asistencia_actual),
         'id' => $evento_id
     ]);
 

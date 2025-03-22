@@ -272,10 +272,6 @@ $num_inscritos = count($asistencia);
                 <i class="material-icons left">how_to_reg</i>
                 Registrarse al Evento
             </a>
-            <a class="btn-large waves-effect waves-light amber darken-2" href="#">
-                <i class="material-icons left">share</i>
-                Compartir Evento
-            </a>
         </div>
     </div>
 </div>
@@ -285,32 +281,35 @@ $num_inscritos = count($asistencia);
 </html>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function () {
         const btnRegistrarse = document.getElementById("btn-registrarse");
 
         btnRegistrarse.addEventListener("click", function (e) {
-            e.preventDefault();
+        e.preventDefault();
 
-            const idEvento = <?= json_encode($id_evento) ?>;
+        // Se obtiene el ID del evento desde PHP
+        const idEvento = <?= json_encode($id_evento) ?>;
 
-            fetch("actions/inscribir.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ eventos: [idEvento] })
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert("Error: " + data.error);
-                    } else {
-                        alert("Inscripción exitosa");
-                        location.reload();
-                    }
-                })
-                .catch(error => {
-                    console.error("Error al procesar la inscripción:", error);
-                    alert("Error al procesar la inscripción. Inténtalo de nuevo más tarde.");
-                });
-        });
+        fetch("actions/inscribir.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ eventos: [idEvento] })
+    })
+        .then(response => response.json())
+        .then(data => {
+        if (data.error) {
+        alert("Error: " + data.error);
+    } else {
+        alert("Inscripción exitosa");
+        // Redirigir a la vista de "Mis eventos" después de la inscripción exitosa
+        location.href = "index.php?view=mis_eventos";
+    }
+    })
+        .catch(error => {
+        console.error("Error al procesar la inscripción:", error);
+        alert("Error al procesar la inscripción. Inténtalo de nuevo más tarde.");
+    });
+    });
     });
 </script>
+

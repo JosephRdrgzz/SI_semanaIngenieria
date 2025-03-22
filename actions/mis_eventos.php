@@ -10,13 +10,10 @@ if (!isset($_SESSION['usuario']['exp'])) {
 $exp = $_SESSION['usuario']['exp'];
 
 try {
-    $query = "SELECT id, nombre, fecha, hora_inicio, hora_fin, lugar, campus, 
-                     fecha > NOW() as cancelable
+    $query = "SELECT id, nombre, fecha, hora_inicio, hora_fin, lugar, campus,
+                     (fecha > CURRENT_DATE) AS cancelable
               FROM evento
-              WHERE EXISTS (
-                  SELECT 1 FROM jsonb_array_elements(evento.asistencia) as asistentes
-                  WHERE asistentes->>'exp' = :exp
-              )";
+              WHERE jsonb_exists(COALESCE(asistencia, '{}')::jsonb, :exp)";
     $stmt = $pdo->prepare($query);
     $stmt->execute(['exp' => $exp]);
     $eventos = $stmt->fetchAll(PDO::FETCH_ASSOC);

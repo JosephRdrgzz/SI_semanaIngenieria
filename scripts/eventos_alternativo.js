@@ -7,11 +7,14 @@ document.addEventListener("DOMContentLoaded", function () {
     function cargarEventos() {
         fetch("actions/eventos.php")
             .then(response => response.json())
-            .then(eventos => {
-                contenedorEventos.innerHTML = ""; // Limpiamos el contenedor
+            .then(data => {
+                console.log("Eventos parseados:", data);
+                // Si la respuesta tiene "result", usamos esa propiedad; de lo contrario, asumimos que data es un arreglo
+                const eventos = data.result ? data.result : data;
+                contenedorEventos.innerHTML = ""; // Limpiar contenedor
 
+                // Opcional: Filtrar para mostrar solo eventos futuros
                 const now = new Date();
-
                 eventos.forEach(evento => {
                     const eventDate = new Date(evento.fecha);
                     if (eventDate >= now) {
@@ -21,46 +24,42 @@ document.addEventListener("DOMContentLoaded", function () {
                         const card = document.createElement("div");
                         card.classList.add("card", "hoverable");
                         card.innerHTML = `
-                            <div class="card-header">
-                                <span class="card-title">${evento.nombre}</span>
-                                <div class="evento-badge campus-${evento.campus.toLowerCase()}">${evento.campus}</div>
-                            </div>
-                            <div class="card-content">
-                                <div class="card-detail">
-                                    <i class="material-icons">group</i>
-                                    <span>Capacidad: ${evento.capacidad}</span>
-                                </div>
-                                <div class="card-detail">
-                                    <i class="material-icons">event</i>
-                                    <span>Fecha: ${evento.fecha}</span>
-                                </div>
-                                <div class="card-detail">
-                                    <i class="material-icons">access_time</i>
-                                    <span>Horario: ${evento.hora_inicio} - ${evento.hora_fin}</span>
-                                </div>
-                                <div class="card-detail">
-                                    <i class="material-icons">place</i>
-                                    <span>Lugar: ${evento.lugar}</span>
-                                </div>
-                            </div>
-                            <div class="card-action">
-                                <a href="index.php?view=detalles_evento&id=${evento.id}" class="teal-text detalles-link">Detalles</a>
-                                <label>
-                                    <input type="checkbox" name="eventos" value="${evento.id}" class="filled-in">
-                                    <span>Seleccionar</span>
-                                </label>
-                            </div>
-                        `;
-
+              <div class="card-header">
+                <span class="card-title">${evento.nombre}</span>
+                <div class="evento-badge campus-${evento.campus.toLowerCase()}">${evento.campus}</div>
+              </div>
+              <div class="card-content">
+                <div class="card-detail">
+                  <i class="material-icons">group</i>
+                  <span>Capacidad: ${evento.capacidad}</span>
+                </div>
+                <div class="card-detail">
+                  <i class="material-icons">event</i>
+                  <span>Fecha: ${evento.fecha}</span>
+                </div>
+                <div class="card-detail">
+                  <i class="material-icons">access_time</i>
+                  <span>Horario: ${evento.hora_inicio} - ${evento.hora_fin}</span>
+                </div>
+                <div class="card-detail">
+                  <i class="material-icons">place</i>
+                  <span>Lugar: ${evento.lugar}</span>
+                </div>
+              </div>
+              <div class="card-action">
+                <a href="index.php?view=detalles_evento&id=${evento.id}" class="teal-text detalles-link">Detalles</a>
+                <label>
+                  <input type="checkbox" name="eventos" value="${evento.id}" class="filled-in">
+                  <span>Seleccionar</span>
+                </label>
+              </div>
+            `;
                         col.appendChild(card);
                         contenedorEventos.appendChild(col);
                     }
                 });
 
-                // Ajustar la altura de las tarjetas
                 ajustarAlturaTarjetas();
-
-                // Añadir listeners a los checkboxes
                 agregarEventListenersCheckboxes();
                 actualizarCarrito();
                 mostrarCarritoSiHayEventosSeleccionados();
@@ -76,7 +75,7 @@ document.addEventListener("DOMContentLoaded", function () {
             const cards = row.querySelectorAll(".card");
             let maxHeight = 0;
             cards.forEach(card => {
-                card.style.height = "auto"; // Reset height
+                card.style.height = "auto";
                 if (card.offsetHeight > maxHeight) {
                     maxHeight = card.offsetHeight;
                 }
@@ -98,13 +97,11 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function actualizarCarrito() {
-        listaEventosSeleccionados.innerHTML = ""; // Limpiar la lista
-
+        listaEventosSeleccionados.innerHTML = "";
         const checkboxes = document.querySelectorAll('input[name="eventos"]:checked');
         checkboxes.forEach(checkbox => {
             const card = checkbox.closest(".card");
             const nombreEvento = card.querySelector(".card-title").textContent;
-
             const li = document.createElement("li");
             li.textContent = nombreEvento;
             listaEventosSeleccionados.appendChild(li);
@@ -113,24 +110,17 @@ document.addEventListener("DOMContentLoaded", function () {
 
     function mostrarCarritoSiHayEventosSeleccionados() {
         const checkboxes = document.querySelectorAll('input[name="eventos"]:checked');
-        if (checkboxes.length > 0) {
-            carritoEventos.style.display = "block";
-        } else {
-            carritoEventos.style.display = "none";
-        }
+        carritoEventos.style.display = (checkboxes.length > 0) ? "block" : "none";
     }
 
     formInscripcion.addEventListener("submit", function (e) {
         e.preventDefault();
-
         const checkboxes = document.querySelectorAll('input[name="eventos"]:checked');
         const eventosSeleccionados = Array.from(checkboxes).map(cb => cb.value);
-
         if (eventosSeleccionados.length === 0) {
             alert("Selecciona al menos un evento");
             return;
         }
-
         fetch("actions/inscribir.php", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -142,7 +132,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     alert("Error: " + data.error);
                 } else {
                     alert("Inscripción exitosa");
-                    cargarEventos(); // Recargar eventos para limpiar checkboxes
+                    cargarEventos(); // Recargar para actualizar la lista
                 }
             })
             .catch(error => {
@@ -151,5 +141,6 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     });
 
+    // Cargar eventos al inicio
     cargarEventos();
 });

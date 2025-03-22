@@ -53,45 +53,40 @@ document.addEventListener("DOMContentLoaded", function () {
     // Carga y filtra eventos
     function cargarEventos() {
         fetch("actions/eventos.php")
-            .then(response => response.text())
-            .then(dataText => {
-                // Mostrar la respuesta cruda de PHP en consola
-                console.log("Respuesta cruda de eventos.php:", dataText);
-                let eventos;
-                try {
-                    eventos = JSON.parse(dataText);
-                    console.log("Array de eventos parseado:", eventos);
-                } catch (e) {
-                    console.error("Error al parsear JSON:", e);
-                    return;
-                }
-                contenedorEventos.innerHTML = ""; // Limpiamos el contenedor
+            .then(response => response.json())
+            .then(data => {
+                // 1) Limpiar el contenedor de eventos
+                contenedorEventos.innerHTML = "";
 
+                console.log("Eventos parseados:", data);
+                const eventos = data.result ? data.result : data;
+
+                // 2) Renderizar solo los eventos que pasen el filtro
                 eventos.forEach(evento => {
                     if (filtrarEvento(evento)) {
                         const card = document.createElement("div");
                         card.classList.add("card");
                         card.innerHTML = `
-                            <div class="img">
-                                <div class="save">
-                                    <input type="checkbox" name="eventos" value="${evento.id}" class="svg">
-                                </div>
+                        <div class="img">
+                            <div class="save">
+                                <input type="checkbox" name="eventos" value="${evento.id}" class="svg">
                             </div>
-                            <div class="text">
-                                <h3 class="h3">${evento.nombre}</h3>
-                                <p class="p"><strong>Fecha:</strong> ${evento.fecha}</p>
-                                <p class="p"><strong>Horario:</strong> ${evento.hora_inicio} - ${evento.hora_fin}</p>
-                                <p class="p"><strong>Lugar:</strong> ${evento.lugar}</p>
-                                <p class="p"><strong>Campus:</strong> ${evento.campus}</p>
-                                <p class="p"><strong>Tipo:</strong> ${evento.tipo_evento}</p>
-                            </div>
-                            <a href="index.php?view=detalles_evento&id=${evento.id}" class="info-button">Más Información</a>
-                        `;
+                        </div>
+                        <div class="text">
+                            <h3 class="h3">${evento.nombre}</h3>
+                            <p class="p"><strong>Fecha:</strong> ${evento.fecha}</p>
+                            <p class="p"><strong>Horario:</strong> ${evento.hora_inicio} - ${evento.hora_fin}</p>
+                            <p class="p"><strong>Lugar:</strong> ${evento.lugar}</p>
+                            <p class="p"><strong>Campus:</strong> ${evento.campus}</p>
+                            <p class="p"><strong>Tipo:</strong> ${evento.tipo_evento}</p>
+                        </div>
+                        <a href="index.php?view=detalles_evento&id=${evento.id}" class="info-button">Más Información</a>
+                    `;
                         contenedorEventos.appendChild(card);
                     }
                 });
 
-                // Actualizamos los checkboxes y el carrito
+                // 3) Volver a configurar checkboxes y carrito
                 agregarEventListenersCheckboxes();
                 actualizarCarrito();
                 mostrarCarritoSiHayEventosSeleccionados();
@@ -127,17 +122,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Actualiza la lista de eventos seleccionados en el carrito
     function actualizarCarrito() {
-        // Limpiar la lista
         listaEventosSeleccionados.innerHTML = "";
-
-        // Obtener todos los checkboxes marcados
         const checkboxes = document.querySelectorAll('input[name="eventos"]:checked');
-
-        // Por cada checkbox marcado, agregamos un <li> con el nombre del evento
         checkboxes.forEach(checkbox => {
             const card = checkbox.closest(".card");
             const nombreEvento = card.querySelector(".h3").textContent;
-
             const li = document.createElement("li");
             li.textContent = nombreEvento;
             listaEventosSeleccionados.appendChild(li);
@@ -147,46 +136,30 @@ document.addEventListener("DOMContentLoaded", function () {
     // Muestra/oculta el carrito en función de si hay eventos seleccionados
     function mostrarCarritoSiHayEventosSeleccionados() {
         const checkboxes = document.querySelectorAll('input[name="eventos"]:checked');
-        if (checkboxes.length > 0) {
-            carritoEventos.style.display = "block";
-        } else {
-            carritoEventos.style.display = "none";
-        }
+        carritoEventos.style.display = (checkboxes.length > 0) ? "block" : "none";
     }
 
-    // Manejo del submit de inscripción con depuración
+    // Manejo del submit de inscripción
     formInscripcion.addEventListener("submit", function (e) {
         e.preventDefault();
-
         const checkboxes = document.querySelectorAll('input[name="eventos"]:checked');
         const eventosSeleccionados = Array.from(checkboxes).map(cb => cb.value);
-
         if (eventosSeleccionados.length === 0) {
             alert("Selecciona al menos un evento");
             return;
         }
-
         fetch("actions/inscribir.php", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ eventos: eventosSeleccionados })
         })
-            .then(response => response.text())
-            .then(dataText => {
-                console.log("Respuesta de inscribir.php (raw):", dataText);
-                let data;
-                try {
-                    data = JSON.parse(dataText);
-                    console.log("Respuesta parseada de inscribir.php:", data);
-                } catch (e) {
-                    console.error("Error al parsear JSON de inscribir.php:", e);
-                    return;
-                }
+            .then(response => response.json())
+            .then(data => {
                 if (data.error) {
                     alert("Error: " + data.error);
                 } else {
                     alert("Inscripción exitosa");
-                    // Tras inscribirse, recargamos los eventos para limpiar checkboxes
+                    // Actualiza la lista de eventos disponibles; el evento inscrito ya no se mostrará.
                     cargarEventos();
                 }
             })
@@ -195,6 +168,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 alert("Error al procesar la inscripción. Inténtalo de nuevo más tarde.");
             });
     });
+
 
     // Listeners para recargar eventos cuando cambien los filtros
     filtroCampus.addEventListener("change", cargarEventos);
