@@ -80,7 +80,7 @@ if (!$alumno) {
     <label>Celular (10 dígitos):</label>
     <input type="text" name="celular" class="input" value="<?= htmlspecialchars($alumno['celular']) ?>" required pattern="\d{10}"><br>
 
-    <label>Responsable:</label>
+    <label>En caso de emergencia llamar a:</label>
     <input type="text" name="responsable" class="input" value="<?= htmlspecialchars($alumno['responsable']) ?>" required pattern="\d{10}"><br>
 
     <button type="submit" class="button">Guardar Cambios</button>

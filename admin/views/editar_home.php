@@ -97,6 +97,12 @@ if (file_exists($archivoVista)) {
             border-radius: 3px;
             cursor: pointer;
         }
+
+        /* Asegurarnos de que las imágenes no excedan el ancho del contenedor */
+        .ql-editor img {
+            max-width: 100%;
+            height: auto;
+        }
     </style>
 
     <!-- Incluir CSS de Quill -->

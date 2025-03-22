@@ -15,7 +15,6 @@
         <nav class="my-navbar-links" id="navbarLinks">
             <a class="my-navbar-btn" href="index.php?view=home">INICIO</a>
             <a class="my-navbar-btn" href="index.php?view=generalidades">GENERALIDADES</a>
-            <a class="my-navbar-btn" href="index.php?view=concursos">CONCURSOS</a>
             <a class="my-navbar-btn" href="index.php?view=contacto">CONTACTO</a>
 
             <?php if (isset($_SESSION['id_usuario'])): ?>
@@ -48,7 +47,6 @@
     <nav class="my-overlay-menu">
         <a class="my-overlay-link" href="index.php?view=home">INICIO</a>
         <a class="my-overlay-link" href="index.php?view=generalidades">GENERALIDADES</a>
-        <a class="my-overlay-link" href="index.php?view=concursos">CONCURSOS</a>
         <a class="my-overlay-link" href="index.php?view=contacto">CONTACTO</a>
 
         <?php if (isset($_SESSION['id_usuario'])): ?>

@@ -129,12 +129,25 @@ if (empty($datosFaltantes)) {
         }
         return true;
     }
+
+    function validateForm(event) {
+        const celular = document.getElementById('celular').value;
+        const responsable = document.getElementById('responsable').value;
+
+        if (celular === responsable) {
+            alert('El número de celular y el de emergencia no pueden ser iguales.');
+            event.preventDefault(); // Prevenir el envío del formulario
+            return false; // Asegurar que el formulario no se envíe
+        }
+
+        return validateEmail(event); // Llamar a la validación del correo
+    }
 </script>
 </head>
 <body>
 <div class="profile-update">
     <h2>Completa tu información</h2>
-    <form action="actions/actualizar_perfil.php" method="POST" onsubmit="return validateEmail(event)">
+    <form action="actions/actualizar_perfil.php" method="POST" onsubmit="return validateForm(event)">
         <label for="mail">Correo institucional (solo ingresa lo que está antes del @anahuac.mx):</label>
         <div class="email-container">
             <input type="text" name="mail" id="mail" required pattern="^[a-zA-Z0-9._%+-]+$" />
@@ -160,9 +173,12 @@ if (empty($datosFaltantes)) {
         <input type="text" name="telefono" id="telefono" required pattern="\d{10}"
                value="<?= htmlspecialchars($userData['telefono'] ?? '') ?>">
 
-        <label for="responsable">Número de contacto de emergencia (10 dígitos):</label>
+        <label for="responsable">En caso de emergencia llamar a: (10 dígitos):</label>
         <input type="text" name="responsable" id="responsable" required pattern="\d{10}"
                value="<?= htmlspecialchars($userData['responsable'] ?? '') ?>">
 
         <input type="submit" class="profile-update-btn" value="Actualizar">
     </form>
+</div>
+</body>
+</html>

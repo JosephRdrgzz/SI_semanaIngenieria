@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
         fetch("actions/tipos_evento.php")
             .then(response => response.json())
             .then(tipos => {
+                console.log("Tipos de evento recibidos:", tipos);
                 tipos.forEach(tipo => {
                     const option = document.createElement("option");
                     option.value = tipo;
@@ -52,8 +53,18 @@ document.addEventListener("DOMContentLoaded", function () {
     // Carga y filtra eventos
     function cargarEventos() {
         fetch("actions/eventos.php")
-            .then(response => response.json())
-            .then(eventos => {
+            .then(response => response.text())
+            .then(dataText => {
+                // Mostrar la respuesta cruda de PHP en consola
+                console.log("Respuesta cruda de eventos.php:", dataText);
+                let eventos;
+                try {
+                    eventos = JSON.parse(dataText);
+                    console.log("Array de eventos parseado:", eventos);
+                } catch (e) {
+                    console.error("Error al parsear JSON:", e);
+                    return;
+                }
                 contenedorEventos.innerHTML = ""; // Limpiamos el contenedor
 
                 eventos.forEach(evento => {
@@ -80,7 +91,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     }
                 });
 
-                // Cada vez que cargamos, actualizamos los checkboxes y el carrito
+                // Actualizamos los checkboxes y el carrito
                 agregarEventListenersCheckboxes();
                 actualizarCarrito();
                 mostrarCarritoSiHayEventosSeleccionados();
@@ -143,7 +154,7 @@ document.addEventListener("DOMContentLoaded", function () {
         }
     }
 
-    // Manejo del submit de inscripción
+    // Manejo del submit de inscripción con depuración
     formInscripcion.addEventListener("submit", function (e) {
         e.preventDefault();
 
@@ -160,8 +171,17 @@ document.addEventListener("DOMContentLoaded", function () {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ eventos: eventosSeleccionados })
         })
-            .then(response => response.json())
-            .then(data => {
+            .then(response => response.text())
+            .then(dataText => {
+                console.log("Respuesta de inscribir.php (raw):", dataText);
+                let data;
+                try {
+                    data = JSON.parse(dataText);
+                    console.log("Respuesta parseada de inscribir.php:", data);
+                } catch (e) {
+                    console.error("Error al parsear JSON de inscribir.php:", e);
+                    return;
+                }
                 if (data.error) {
                     alert("Error: " + data.error);
                 } else {
