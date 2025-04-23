@@ -1,10 +1,9 @@
 <?php
-// Asegúrate de que la sesión esté iniciada si usas la lógica de $_SESSION
-// session_start(); // Normalmente ya se hace en index.php
+// session_start(); // Si no se inicia en index.php, hazlo aquí
 ?>
 <div class="my-navbar">
     <div class="my-navbar-container">
-        <!-- LOGO (ajusta a tu gusto) -->
+        <!-- LOGO -->
         <div class="my-navbar-logo">
             <a href="index.php?view=home">
                 <img src="https://merida.anahuac.mx/hubfs/Anahuac%20A_Mesa%20de%20trabajo%201.png" alt="Mi Logo">
@@ -18,9 +17,10 @@
             <a class="my-navbar-btn" href="index.php?view=contacto">CONTACTO</a>
 
             <?php if (isset($_SESSION['id_usuario'])): ?>
-                <a class="my-navbar-btn" href="index.php?view=eventos">EVENTOS</a>
+                <a class="my-navbar-btn" href="index.php?view=eventos2">EVENTOS</a>
                 <a class="my-navbar-btn" href="index.php?view=mis_eventos">Mis Eventos</a>
-                <a class="my-navbar-btn" href="index.php?view=editar_perfil&exp=<?= $_SESSION['usuario']['exp'] ?>">
+                <!-- Truncamos el nombre de usuario si es muy largo -->
+                <a class="my-navbar-btn my-user-name" href="index.php?view=editar_perfil&exp=<?= $_SESSION['usuario']['exp'] ?>">
                     <?= $_SESSION['usuario']['nombre'] ?>
                 </a>
                 <a class="my-navbar-btn" href="index.php?action=logout">CERRAR SESIÓN</a>
@@ -30,18 +30,14 @@
         </nav>
 
         <!-- Botón hamburguesa (visible en pantallas pequeñas) -->
-        <button class="my-hamburger" id="hamburger">
-            &#9776;
-        </button>
+        <button class="my-hamburger" id="hamburger">&#9776;</button>
     </div>
 </div>
 
 <!-- OVERLAY que cubre la pantalla en móviles -->
 <div class="my-overlay" id="myOverlay">
     <!-- Botón para cerrar el menú -->
-    <button class="my-overlay-close" id="overlayClose">
-        &times;
-    </button>
+    <button class="my-overlay-close" id="overlayClose">&times;</button>
 
     <!-- Enlaces dentro del overlay -->
     <nav class="my-overlay-menu">
@@ -50,7 +46,7 @@
         <a class="my-overlay-link" href="index.php?view=contacto">CONTACTO</a>
 
         <?php if (isset($_SESSION['id_usuario'])): ?>
-            <a class="my-overlay-link" href="index.php?view=eventos">EVENTOS</a>
+            <a class="my-overlay-link" href="index.php?view=eventos2">EVENTOS</a>
             <a class="my-overlay-link" href="index.php?view=mis_eventos">Mis Eventos</a>
             <a class="my-overlay-link" href="index.php?view=editar_perfil&exp=<?= $_SESSION['usuario']['exp'] ?>">
                 <?= $_SESSION['usuario']['nombre'] ?>
@@ -62,7 +58,7 @@
     </nav>
 </div>
 
-<!-- CSS incrustado en el mismo archivo (navbar.php) -->
+<!-- CSS incrustado -->
 <style>
     /* IMPORTAMOS LA FUENTE LATO */
     @import url('https://fonts.googleapis.com/css?family=Lato:400,700&display=swap');
@@ -70,11 +66,10 @@
     /* ================================
        NAVBAR ESTILOS
        ================================ */
-
-    /* Ajuste base de la navbar */
     .my-navbar {
         background-color: #fff;
         border-bottom: 1px solid #ccc;
+        font-family: 'Lato', sans-serif;
     }
 
     .my-navbar-container {
@@ -95,6 +90,9 @@
     .my-navbar-links {
         display: flex;
         gap: 1rem;
+        /* Evita que el contenido pase a 2 líneas */
+        flex-wrap: nowrap;
+        white-space: nowrap;
     }
 
     .my-navbar-btn {
@@ -106,6 +104,16 @@
 
     .my-navbar-btn:hover {
         color: #666;
+    }
+
+    /* Para truncar el nombre de usuario si es muy largo */
+    .my-navbar-btn.my-user-name {
+        max-width: 150px;        /* Ajusta según tu preferencia */
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        display: inline-block;
+        vertical-align: middle;
     }
 
     /* Botón hamburguesa (oculto en pantallas grandes) */
@@ -134,13 +142,11 @@
         flex-direction: column;
         align-items: center;
         padding-top: 2rem;
-
-        /* Para que no se corte CERRAR SESIÓN cuando haya muchas opciones */
-        overflow-y: auto;
+        overflow-y: auto; /* Para que no se corte el contenido */
     }
 
     /* Clase que se agrega al abrir overlay */
-    .my-overlay.my-overlay--active {
+    .my-overlay--active {
         transform: translateY(0);
     }
 
@@ -162,15 +168,15 @@
         flex: 1;
         display: flex;
         flex-direction: column;
-        gap: 1rem; /* reduce de 1.5rem a 1rem para compactar */
+        gap: 1rem;
     }
 
     .my-overlay-link {
         text-decoration: none;
         color: #333;
-        font-size: 1.2rem;       /* reduce de 1.4rem a 1.2rem */
+        font-size: 1.2rem;
         font-weight: 600;
-        font-family: 'Lato', sans-serif; /* usar la fuente Lato */
+        font-family: 'Lato', sans-serif;
     }
 
     /* ================================
@@ -184,12 +190,6 @@
         .my-hamburger {
             display: block;
         }
-
-        /* Ajuste de la navbar en pantallas chicas */
-        .my-navbar-container {
-            flex-direction: row;
-            align-items: center;
-            justify-content: space-between;
-        }
     }
 </style>
+

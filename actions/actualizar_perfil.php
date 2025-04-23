@@ -54,6 +54,8 @@ $_SESSION['usuario']['responsable'] = $responsable;
 
 // Redirigir al home
 unset($_SESSION['datosFaltantes']);
+$_SESSION['perfil_completo'] = true;
 header("Location: ../index.php?view=home");
 exit();
 ?>
+

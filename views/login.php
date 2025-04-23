@@ -67,7 +67,8 @@ unset($_SESSION['error']);
         <form class="col m8 offset-m2 s12 grey darken-3 z-depth-1 white-text" method="POST" action="actions/login.php">
             <div class="row">
                 <div class="col s12 center">
-                    <h3>Iniciar Sesión</h3>
+		    <h3>Iniciar Sesión</h3>
+                    <p>Profesores NO incluír ceros</p>
                 </div>
             </div>
             <?php if (!empty($error)): ?>
@@ -80,7 +81,7 @@ unset($_SESSION['error']);
 
             <div class="row">
                 <div class="input-field col m8 offset-m2 s10 offset-s1">
-                    <input placeholder="ID con ceros" id="exp" type="text" name="exp" class="white-text validate" required>
+                    <input placeholder="ID con ceros (excepto profesores)" id="exp" type="text" name="exp" class="white-text validate" required>
                     <label for="exp">Matrícula</label>
                 </div>
             </div>

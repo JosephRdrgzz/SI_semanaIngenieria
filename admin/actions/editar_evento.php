@@ -25,33 +25,62 @@ $campus = $_POST['campus'] ?? null;
 $comentario = $_POST['comentario'] ?? null;
 $direccion = $_POST['direccion'] ?? null;
 $lineamientos = $_POST['lineamientos'] ?? null;
-$expositor = $_POST['expositor'] ?? null;
 
-// Validar que el tipo de evento es uno de los permitidos
-$tipos_permitidos = ['Taller', 'Exposición', 'Concurso', 'Conferencia','Oportunidad Laboral'];
-if (!in_array($tipo_evento, $tipos_permitidos)) {
-    echo json_encode(["error" => "Tipo de evento no válido"]);
-    exit();
+// Ajustar 'expositor' para permitir nulo
+$expositor = trim($_POST['expositor'] ?? '');
+if ($expositor === '') {
+    $expositor = null;
 }
 
-// Validar datos
-if (!$id_evento || !$nombre || !$capacidad || !$fecha || !$hora_inicio || !$hora_fin || !$lugar || !$campus || !$direccion || !$lineamientos || !$expositor) {
+// Validar el campo "tipo_evento"
+if ($tipo_evento === "otro") {
+    $tipo_evento_otro = trim($_POST['tipo_evento_otro'] ?? '');
+    if (empty($tipo_evento_otro)) {
+        echo json_encode(["error" => "Debe especificar el nuevo tipo de evento"]);
+        exit();
+    }
+    // Intentar agregar el nuevo valor al ENUM
+    try {
+        $nuevoValor = $pdo->quote($tipo_evento_otro);
+        $sql_alter = "ALTER TYPE tipo_evento_enum ADD VALUE $nuevoValor";
+        $pdo->exec($sql_alter);
+    } catch (Exception $e) {
+        // Si el error indica que el valor ya existe, lo ignoramos.
+        if (strpos($e->getMessage(), 'duplicate key value') === false) {
+            echo json_encode(["error" => "Error al agregar el nuevo tipo de evento: " . $e->getMessage()]);
+            exit();
+        }
+    }
+    $tipo_evento = $tipo_evento_otro;
+} else {
+    // Validar que el valor ingresado se encuentre en el ENUM actual
+    $query_tipos = $pdo->query("SELECT unnest(enum_range(NULL::tipo_evento_enum)) AS tipo");
+    $tipos_existentes = $query_tipos->fetchAll(PDO::FETCH_COLUMN);
+
+    if (!in_array($tipo_evento, $tipos_existentes)) {
+        echo json_encode(["error" => "Tipo de evento no válido"]);
+        exit();
+    }
+}
+
+// Validar datos (sin 'expositor' como requerido)
+if (!$id_evento || !$nombre || !$capacidad || !$fecha || !$hora_inicio || !$hora_fin || !$lugar || !$campus || !$direccion || !$lineamientos) {
     echo json_encode(["error" => "Todos los campos obligatorios deben llenarse"]);
     exit();
 }
 
-// Si el usuario seleccionó "Otro", usar el input de texto como lugar
+// Si el usuario seleccionó "Otro" en lugar
 if ($lugar === "otro" && !empty($lugar_otro)) {
     $lugar = $lugar_otro;
 }
 
-// Validar que la hora de inicio sea menor que la hora de fin
+// Validar horas
 if (strtotime($hora_inicio) >= strtotime($hora_fin)) {
     echo json_encode(["error" => "La hora de inicio debe ser menor que la hora de fin"]);
     exit();
 }
 
-// Verificar si el evento existe
+// Verificar existencia del evento
 $query_existencia = "SELECT id FROM evento WHERE id = :id_evento";
 $stmt_existencia = $pdo->prepare($query_existencia);
 $stmt_existencia->execute(['id_evento' => $id_evento]);
@@ -71,7 +100,7 @@ if (!empty($traslapes)) {
     exit();
 }
 
-// Verificar capacidad
+// Verificar capacidad del salón
 $capacidad_salon = obtenerCapacidadSalon($lugar);
 if ($capacidad_salon && $capacidad > $capacidad_salon['capacidad']) {
     echo json_encode(["error" => "La capacidad del evento ($capacidad) excede el límite del salón ({$capacidad_salon['capacidad']})."]);
@@ -91,29 +120,29 @@ try {
 
     $stmt = $pdo->prepare($query_update);
     $stmt->execute([
-        'id_evento' => $id_evento,
-        'nombre' => $nombre,
+        'id_evento'   => $id_evento,
+        'nombre'      => $nombre,
         'tipo_evento' => $tipo_evento,
-        'capacidad' => $capacidad,
-        'fecha' => $fecha,
+        'capacidad'   => $capacidad,
+        'fecha'       => $fecha,
         'hora_inicio' => $hora_inicio,
-        'hora_fin' => $hora_fin,
-        'lugar' => $lugar,
-        'campus' => $campus,
-        'comentario' => $comentario,
-        'direccion' => $direccion,
-        'lineamientos' => $lineamientos,
-        'expositor' => $expositor
+        'hora_fin'    => $hora_fin,
+        'lugar'       => $lugar,
+        'campus'      => $campus,
+        'comentario'  => $comentario,
+        'direccion'   => $direccion,
+        'lineamientos'=> $lineamientos,
+        'expositor'   => $expositor  // Puede ser NULL
     ]);
 
     $pdo->commit();
 
     echo json_encode([
-        "success" => "Evento actualizado correctamente",
-        "debug_query" => $query_update
+        "success" => "Evento actualizado correctamente"
     ]);
 } catch (Exception $e) {
     $pdo->rollBack();
     echo json_encode(["error" => "Error al editar evento: " . $e->getMessage()]);
 }
 exit();
+

@@ -320,7 +320,7 @@ a {
     fill: #ced8de;
 }
 
-.info-button {
+.delete-button {
     margin: 10px;
     padding: 10px;
     background-color: #e66465;
@@ -331,9 +331,26 @@ a {
     align-self: center;
 }
 
-.info-button:hover {
+.delete-button:hover {
     background-color: #d05353;
 }
+.info-button {
+    margin: 10px;
+    padding: 10px 14px; /* un poco más de padding */
+    background-color: #f3c70f;
+    color: white;
+    border: 2px solid #f3c70f;
+    border-radius: 5px;
+    cursor: pointer;
+    align-self: center;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.info-button:hover {
+    background-color: #e6b80d;
+    border-color: #e6b80d;
+}
+
 
 /* botón para inscribirse a eventos */
 
@@ -544,13 +561,39 @@ a {
 
 
 /* Contenedores para mis eventos */
+/* Contenedor principal de las tarjetas, con flex y wrap */
 #contenedor-mis-eventos {
     display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    gap: 20px; /* Espacio entre tarjetas */
-    justify-content: flex-start; /* Alinear las tarjetas al inicio */
+    flex-wrap: wrap;
+    gap: 1rem;               /* Espacio entre tarjetas */
+    justify-content: center; /* Centrar las tarjetas horizontalmente */
+    margin-top: 20px;        /* Separación respecto a filtros o encabezado */
 }
 
+/* Tarjetas: igual que en 'Eventos Disponibles' */
+#contenedor-mis-eventos .card {
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 300px;           /* Ancho fijo para que hagan wrap */
+    display: flex;
+    flex-direction: column;
+    transition: box-shadow 0.2s;
+}
 
+#contenedor-mis-eventos .card:hover {
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
 
+/* Si tu HTML define subelementos .card-header, .card-content, etc., reusa esas clases */
+#contenedor-mis-eventos .card .img {
+    /* Ejemplo: altura de imagen, fondo, etc. */
+    background-color: #f5f5f5;
+    height: 120px;
+}
+#contenedor-mis-eventos .card .text {
+    padding: 0.5rem;
+    flex-grow: 1;
+}
+#contenedor-mis-eventos .card .text h3 {
+    margin-top: 0;
+}

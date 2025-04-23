@@ -14,12 +14,39 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['tipo_usuario'] !== 'admin') {
 $nombre = $_POST['nombre'] ?? null;
 $tipo_evento = $_POST['tipo_evento'] ?? null;
 
-// Validar que el tipo de evento es uno de los permitidos
-$tipos_permitidos = ['Taller', 'Exposición', 'Concurso', 'Conferencia','Oportunidad Laboral'];
-if (!in_array($tipo_evento, $tipos_permitidos)) {
-    echo json_encode(["error" => "Tipo de evento no válido"]);
-    exit();
+// Validar el campo "tipo_evento"
+// Si se seleccionó "otro" para el tipo de evento
+if ($tipo_evento === "otro") {
+    $tipo_evento_otro = trim($_POST['tipo_evento_otro'] ?? '');
+    if (empty($tipo_evento_otro)) {
+        echo json_encode(["error" => "Debe especificar el nuevo tipo de evento"]);
+        exit();
+    }
+    // Intentar agregar el nuevo valor al ENUM
+    try {
+        $nuevoValor = $pdo->quote($tipo_evento_otro); // Escapa la cadena, incluyendo comillas simples
+        $sql_alter = "ALTER TYPE tipo_evento_enum ADD VALUE $nuevoValor";
+        $pdo->exec($sql_alter);
+    } catch (Exception $e) {
+        // Si el error indica que el valor ya existe, lo ignoramos.
+        if (strpos($e->getMessage(), 'duplicate key value') === false) {
+            echo json_encode(["error" => "Error al agregar el nuevo tipo de evento: " . $e->getMessage()]);
+            exit();
+        }
+    }
+    // Usar el nuevo tipo para el insert/update.
+    $tipo_evento = $tipo_evento_otro;
+} else {
+    // En caso contrario, validar que el valor ingresado se encuentre en el ENUM actual
+    $query_tipos = $pdo->query("SELECT unnest(enum_range(NULL::tipo_evento_enum)) AS tipo");
+    $tipos_existentes = $query_tipos->fetchAll(PDO::FETCH_COLUMN);
+
+    if (!in_array($tipo_evento, $tipos_existentes)) {
+        echo json_encode(["error" => "Tipo de evento no válido"]);
+        exit();
+    }
 }
+
 
 $capacidad = $_POST['capacidad'] ?? null;
 $fecha = $_POST['fecha'] ?? null;
@@ -31,7 +58,11 @@ $campus = $_POST['campus'] ?? null;
 $comentario = $_POST['comentario'] ?? null;
 $direccion = $_POST['direccion'] ?? null;
 $lineamientos = $_POST['lineamientos'] ?? null;
-$expositor = $_POST['expositor'] ?? null;
+$expositor = trim($_POST['expositor'] ?? '');
+if ($expositor === '') {
+    $expositor = null;
+}
+
 
 // Si el usuario seleccionó "Otro", usamos el input de texto
 if ($lugar === "otro" && !empty($lugar_otro)) {
@@ -39,7 +70,7 @@ if ($lugar === "otro" && !empty($lugar_otro)) {
 }
 
 // Validar datos requeridos
-if (!$nombre || !$capacidad || !$fecha || !$hora_inicio || !$hora_fin || !$lugar || !$campus || !$direccion || !$lineamientos || !$expositor) {
+if (!$nombre || !$capacidad || !$fecha || !$hora_inicio || !$hora_fin || !$lugar || !$campus || !$direccion || !$lineamientos) {
     echo json_encode(["error" => "Todos los campos obligatorios deben llenarse"]);
     exit();
 }
@@ -127,3 +158,4 @@ try {
     $pdo->rollBack();
     echo json_encode(["error" => "Error al agregar evento: " . $e->getMessage()]);
 }
+

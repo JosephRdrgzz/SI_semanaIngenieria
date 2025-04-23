@@ -8,7 +8,7 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['tipo_usuario'] !== 'admin') {
     exit();
 }
 
-// Definir el encabezado obligatorio a incluir en la vista
+// Snippet para proteger la vista generalidades
 $headerSnippet = "<?php
 if (!isset(\$_SESSION['id_usuario'])) {
     header(\"Location: index.php?view=login\");
@@ -16,45 +16,82 @@ if (!isset(\$_SESSION['id_usuario'])) {
 }
 ?>\n\n";
 
-// Ruta al archivo de vista que se desea editar
+// Ruta al archivo a editar (generalidades.php)
 $archivoVista = __DIR__ . '/../../views/generalidades.php';
 
-$message = null; // Variable para mostrar mensajes en la misma página
+$message = null;
 
 // Si llega contenido por POST
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['contenido'])) {
     $contenido = $_POST['contenido'];
 
-    // Envuelves el contenido que se guardará en un contenedor centrado
-    $contenidoAGuardar = $headerSnippet
-        . '<div style="max-width: 800px; margin: 0 auto; padding: 20px;">'
-        . $contenido
-        . '</div>';
+    // Definimos el CSS responsivo y la clase .contenedor-home
+    $cssResponsivo = <<<CSS
+<style>
+  .contenedor-home {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  .contenedor-home img {
+    max-width: 100%;
+    height: auto;
+  }
+  @media (max-width: 768px) {
+    .contenedor-home {
+      max-width: 100% !important;
+      padding: 10px;
+    }
+  }
+</style>
+CSS;
 
+    // Construimos el contenido a guardar
+    $contenidoAGuardar = $headerSnippet
+        . $cssResponsivo
+        . "<div class=\"contenedor-home\">"
+        . $contenido
+        . "</div>";
+
+    // Guardamos en generalidades.php
     if (file_put_contents($archivoVista, $contenidoAGuardar) !== false) {
-        $message = 'success'; // Se guardó correctamente
+        $message = 'success';
     } else {
-        $message = 'error'; // Ocurrió un problema al guardar
+        $message = 'error';
     }
 }
 
-// Leer el contenido actual (si existe) para cargarlo en el editor
+// Leer el contenido actual para cargarlo en Quill
 $contenidoActual = '';
 if (file_exists($archivoVista)) {
     $contenidoActual = file_get_contents($archivoVista);
-    // Remover el header obligatorio
+
+    // 1) Quitar el headerSnippet
     if (strpos($contenidoActual, $headerSnippet) === 0) {
         $contenidoActual = substr($contenidoActual, strlen($headerSnippet));
     }
-    // Remover el contenedor centrado si está presente
-    $wrapperStart = '<div style="max-width: 800px; margin: 0 auto; padding: 20px;">';
+
+    // 2) Quitar el bloque <style>...</style>
+    $cssStart = "<style>";
+    $cssEnd   = "</style>";
+    if (strpos($contenidoActual, $cssStart) === 0) {
+        $posEnd = strpos($contenidoActual, $cssEnd);
+        if ($posEnd !== false) {
+            $contenidoActual = substr($contenidoActual, $posEnd + strlen($cssEnd));
+        }
+    }
+
+    // 3) Quitar <div class="contenedor-home"> ... </div>
+    $wrapperStart = '<div class="contenedor-home">';
     $wrapperEnd   = '</div>';
+    $contenidoTrim = trim($contenidoActual);
 
     if (
-        strpos($contenidoActual, $wrapperStart) === 0 &&
-        substr(trim($contenidoActual), -strlen($wrapperEnd)) === $wrapperEnd
+        strpos($contenidoTrim, $wrapperStart) === 0 &&
+        substr($contenidoTrim, -strlen($wrapperEnd)) === $wrapperEnd
     ) {
-        $contenidoActual = substr($contenidoActual, strlen($wrapperStart), -strlen($wrapperEnd));
+        $contenidoTrim = substr($contenidoTrim, strlen($wrapperStart), -strlen($wrapperEnd));
+        $contenidoActual = trim($contenidoTrim);
     }
 }
 ?>
@@ -97,55 +134,53 @@ if (file_exists($archivoVista)) {
             border-radius: 3px;
             cursor: pointer;
         }
-
-        /* Asegurarnos de que las imágenes no excedan el ancho del contenedor */
+        /* Para que en el editor Quill las imágenes no excedan el contenedor */
         .ql-editor img {
             max-width: 100%;
             height: auto;
         }
     </style>
-
-    <!-- Incluir CSS de Quill -->
+    <!-- Quill CSS -->
     <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
 </head>
 <body>
 <div class="edit-view-editor">
     <h2>Editar Contenido de Generalidades</h2>
 
-    <!-- Mostrar mensaje de éxito o error -->
+    <!-- Mensaje de éxito/error -->
     <?php if ($message === 'success'): ?>
         <div class="message">Contenido actualizado correctamente.</div>
     <?php elseif ($message === 'error'): ?>
         <div class="message">Error al actualizar el contenido.</div>
     <?php endif; ?>
 
-    <!-- Formulario para guardar el contenido -->
     <form id="edit-form" action="" method="post">
         <div id="editor-container">
-            <!-- Contenedor del editor -->
             <div id="editor" style="height: 300px;"></div>
-            <!-- Campo oculto para enviar el contenido HTML -->
             <input type="hidden" name="contenido" id="contenido">
         </div>
         <button type="submit">Guardar Cambios</button>
     </form>
 </div>
 
-<!-- Incluir la librería de Quill -->
+<!-- Quill JS -->
 <script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.js"></script>
 <script>
     // Inicializar Quill
-    const quill = new Quill('#editor', {
-        theme: 'snow'
-    });
+    const quill = new Quill('#editor', { theme: 'snow' });
 
-    // Cargar contenido del archivo en Quill
-    quill.root.innerHTML = `<?= addslashes($contenidoActual) ?>`;
+    // Guardamos el contenido actual en una variable de JavaScript
+    const contenidoActual = <?= json_encode($contenidoActual) ?>;
 
-    // Antes de enviar el formulario, copiar el contenido HTML del editor al campo hidden
-    document.getElementById('edit-form').addEventListener('submit', function(e) {
+    // Insertamos el contenido en Quill
+    quill.clipboard.dangerouslyPasteHTML(contenidoActual);
+
+    // Al enviar el formulario, pasamos el contenido a <input hidden>
+    document.getElementById('edit-form').addEventListener('submit', function() {
         document.getElementById('contenido').value = quill.root.innerHTML;
     });
 </script>
+
 </body>
 </html>
+

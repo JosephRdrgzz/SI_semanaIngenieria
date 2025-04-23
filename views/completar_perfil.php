@@ -10,27 +10,34 @@ if (!isset($_SESSION['usuario'])) {
 $usuario = $_SESSION['usuario'];
 $exp = $usuario['exp'];
 
-// Verificar si tiene datos faltantes
-$query = $pdo->prepare("SELECT mail, campus, semestre, celular, telefono, responsable 
+// Incluimos el campo idprograma en la consulta
+$query = $pdo->prepare("SELECT idprograma, mail, campus, semestre, celular, telefono, responsable 
                         FROM alumnos WHERE exp = :exp");
 $query->execute(['exp' => $exp]);
 $userData = $query->fetch(PDO::FETCH_ASSOC);
 
-$datosFaltantes = [];
-
-// Validar que no haya campos vacíos
-foreach ($userData as $campo => $valor) {
-    if (empty($valor)) {
-        $datosFaltantes[] = $campo;
-    }
-}
-
-// Si todos los datos están completos, redirigir a eventos
-if (empty($datosFaltantes)) {
+// Si el usuario es profesor, se marca el perfil como completo y se redirige
+if ($userData['idprograma'] === 'PROFESOR') {
+    $_SESSION['perfil_completo'] = true;
     header("Location: index.php?view=eventos");
     exit();
 }
 
+$datosFaltantes = [];
+
+// Validar que no haya campos vacíos (excluimos idprograma de la validación)
+foreach ($userData as $campo => $valor) {
+    if ($campo !== 'idprograma' && empty($valor)) {
+        $datosFaltantes[] = $campo;
+    }
+}
+
+// Si todos los datos están completos, se marca el perfil como completo y se redirige
+if (empty($datosFaltantes)) {
+    $_SESSION['perfil_completo'] = true;
+    header("Location: index.php?view=eventos");
+    exit();
+}
 ?>
 <title>Completa tu información</title>
 <style>
@@ -148,6 +155,7 @@ if (empty($datosFaltantes)) {
 <div class="profile-update">
     <h2>Completa tu información</h2>
     <form action="actions/actualizar_perfil.php" method="POST" onsubmit="return validateForm(event)">
+        <label>No podras continuar si no completas tu información</label>
         <label for="mail">Correo institucional (solo ingresa lo que está antes del @anahuac.mx):</label>
         <div class="email-container">
             <input type="text" name="mail" id="mail" required pattern="^[a-zA-Z0-9._%+-]+$" />
@@ -182,3 +190,4 @@ if (empty($datosFaltantes)) {
 </div>
 </body>
 </html>
+

@@ -26,5 +26,6 @@
 
 <!-- Contenedor de eventos -->
 <div id="contenedor-mis-eventos"></div>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
 
 <script src="scripts/mis_eventos.js"></script>

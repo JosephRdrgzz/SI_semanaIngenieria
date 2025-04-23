@@ -29,9 +29,22 @@
                         <a href="index.php?view=contacto">CONTACTO</a>
                     </div>
                 </div>
+                <!-- Submenú DISCRETO -->
+                <div class="my-navbar-dropdown">
+                    <!-- Botón principal -->
+                    <button class="my-navbar-btn">
+                        GESTIÓN &#9662;
+                    </button>
+                    <!-- Contenido del submenú -->
+                    <div class="my-navbar-dropdown-content">
+                        <a class="my-navbar-btn"  href="index.php?view=gestionar_usuarios">CARGAR ALUMNOS</a>
+                        <a class="my-navbar-btn"  href="index.php?view=cargar_salones">CARGAR SALONES</a>
+                        <a class="my-navbar-btn"  href="index.php?view=gestionar_alumnos">GESTIONAR ALUMNOS</a>
+			<a class="my-navbar-btn" href="index.php?view=gestionar_eventos">GESTIONAR EVENTOS</a>
+			<a class="my-navbar-btn" href="index.php?view=gestionar_pasados">GESTIONAR EVENTOS PASADOS</a>
+		    </div>
+                </div>
 
-                <a class="my-navbar-btn" href="index.php?view=gestionar_eventos">GESTIONAR EVENTOS</a>
-                <a class="my-navbar-btn" href="index.php?view=gestionar_usuarios">GESTIONAR USUARIOS</a>
                 <a class="my-navbar-btn" href="index.php?action=logout">CERRAR SESIÓN</a>
 
             <?php elseif (isset($_SESSION['id_usuario'])): ?>
@@ -61,9 +74,12 @@
             <a class="my-overlay-link" href="index.php?view=editar_home">INICIO (EDITAR)</a>
             <a class="my-overlay-link" href="index.php?view=generalidades">GENERALIDADES</a>
             <a class="my-overlay-link" href="index.php?view=contacto">CONTACTO</a>
-            <a class="my-overlay-link" href="index.php?view=gestionar_eventos">GESTIONAR EVENTOS</a>
-            <a class="my-overlay-link" href="index.php?view=gestionar_usuarios">GESTIONAR USUARIOS</a>
-            <a class="my-overlay-link" href="index.php?action=logout">CERRAR SESIÓN</a>
+	    <a class="my-overlay-link" href="index.php?view=gestionar_eventos">GESTIONAR EVENTOS</a>
+            <a class="my-overlay-link" href="index.php?view=gestionar_pasados">GESTIONAR EVENTOS PASADOS</a>
+            <a class="my-overlay-link" href="index.php?view=gestionar_alumnos">GESTIONAR ALUMNOS</a>
+            <a class="my-overlay-link" href="index.php?view=gestionar_usuarios">CARGAR ALUMNOS</a>
+            <a class="my-overlay-link"  href="index.php?view=cargar_salones">CARGAR SALONES</a>
+	    <a class="my-overlay-link" href="index.php?action=logout">CERRAR SESIÓN</a>
 
         <?php elseif (isset($_SESSION['id_usuario'])): ?>
             <a class="my-overlay-link" href="index.php?view=editar_perfil&exp=<?= $_SESSION['usuario']['exp'] ?>">
@@ -82,6 +98,20 @@
         const hamburger = document.getElementById("hamburger");
         const overlay = document.getElementById("myOverlay");
         const overlayClose = document.getElementById("overlayClose");
+        function checkOverlayVisibility() {
+            // Si el botón hamburguesa está oculto => estamos en pantalla grande
+            // (o en general, donde .my-navbar-links está visible)
+            if (window.getComputedStyle(hamburger).display === "none") {
+                // Fuerza a cerrar el overlay
+                overlay.classList.remove("my-overlay--active");
+            }
+        }
+
+        // Cada vez que la ventana cambie de tamaño, volvemos a verificar
+        window.addEventListener("resize", checkOverlayVisibility);
+
+        // Verificamos al cargar
+        checkOverlayVisibility();
 
         hamburger.addEventListener("click", function () {
             overlay.classList.add("my-overlay--active");
@@ -202,14 +232,17 @@
         width: 100%; height: 100%;
         background: #fff;
         z-index: 9999;
-        transform: translateY(-100%);
+        transform: translateY(-300%);
         transition: transform 0.3s ease-in-out;
         display: flex;
         flex-direction: column;
         padding-top: 2rem;
+        pointer-events: none; /* No intercepta clics */
     }
     .my-overlay--active {
         transform: translateY(0);
+        pointer-events: auto; /* Ahora sí intercepta clics */
+
     }
     .my-overlay-close {
         background: none;
@@ -307,3 +340,5 @@
     }
 
 </style>
+
+

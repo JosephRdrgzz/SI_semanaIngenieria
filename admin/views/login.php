@@ -8,9 +8,8 @@ if (isset($_SESSION['id_usuario'])) {
     exit();
 }
 
-$error = $_SESSION['error'] ?? ""; // Inicializar variable de error
-unset($_SESSION['error']); // Borrar error tras mostrarlo
-
+$error = $_SESSION['error'] ?? "";
+unset($_SESSION['error']);
 ?>
 
 <h2>Iniciar Sesión</h2>
@@ -22,14 +21,18 @@ unset($_SESSION['error']); // Borrar error tras mostrarlo
     <form action="actions/login.php" method="post" id="form">
         <div id="form-body">
             <div id="welcome-lines">
-                <div id="welcome-line-1">ADMIN</div>
+                <div id="welcome-line-1">LOGIN</div>
             </div>
             <div id="input-area">
                 <div class="form-inp">
-                    <input placeholder="ID usuario" type="text" name="exp" required>
+                    <!-- Campo para ID o correo -->
+                    <input placeholder="ID o Correo" type="text" name="usuario" id="usuario" required>
                 </div>
-                <div class="form-inp">
-                    <input placeholder="Contraseña" type="password" name="contraseña" required>
+                <div class="form-inp" id="password-container">
+                    <input placeholder="Contraseña" type="password" name="contraseña" id="password-field" required>
+                    <span class="toggle-eye">
+                        <i class="material-icons" id="toggle-password-icon">visibility_off</i>
+                      </span>
                 </div>
             </div>
             <div id="submit-button-cvr">
@@ -41,21 +44,19 @@ unset($_SESSION['error']); // Borrar error tras mostrarlo
 </div>
 
 <script>
-    document.getElementById("exp").addEventListener("blur", function () {
-        let exp = this.value.trim();
-        if (exp !== "") {
-            fetch("actions/verificar_admin.php?exp=" + exp)
-                .then(response => response.json())
-                .then(data => {
-                    let passwordContainer = document.getElementById("password-container");
-                    if (data.es_admin) {
-                        passwordContainer.style.display = "block";
-                        document.getElementById("password-field").setAttribute("required", "true");
-                    } else {
-                        passwordContainer.style.display = "none";
-                        document.getElementById("password-field").removeAttribute("required");
-                    }
-                });
+    const toggleIcon = document.getElementById('toggle-password-icon');
+    const passwordField = document.getElementById('password-field');
+
+    toggleIcon.addEventListener('click', function() {
+        if (passwordField.type === 'password') {
+            passwordField.type = 'text';
+            toggleIcon.textContent = 'visibility'; // Cambia el ícono a "ojo abierto"
+        } else {
+            passwordField.type = 'password';
+            toggleIcon.textContent = 'visibility_off'; // Cambia el ícono a "ojo tachado"
         }
     });
 </script>
+
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+

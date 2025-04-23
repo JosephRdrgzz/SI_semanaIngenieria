@@ -38,16 +38,10 @@ html, body {
     padding: 0;
 }
 
-#navbar {
-    width: 100%;
-    text-align: center;
-    padding: 10px 0;
-    background: white;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-}
 
-/* Apply the container class to header, navbar, and footer */
-#header, #navbar {
+
+/* Apply the container class to header, and footer */
+#header {
     margin: 0;
     padding: 0;}
 
@@ -653,10 +647,7 @@ a {
         padding: 20px;
     }
 
-    #navbar a {
-        display: block;
-        padding: 10px;
-    }
+
 
     #footer {
         position: relative;
@@ -1120,3 +1111,32 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .two-column .user-box {
     flex: 1 1 45%;    /* Cada campo ocupa ~45% del contenedor */
 }
+
+
+
+/*login botón para ver contraseña*/
+
+.password-wrapper {
+    position: relative;
+    display: inline-block;
+}
+
+#password-field {
+    padding-right: 35px; /* Deja espacio para el ícono */
+}
+
+.toggle-eye {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    user-select: none; /* Evita que se seleccione el texto del ícono */
+}
+
+.material-icons {
+    font-size: 20px;
+    color: #999; /* Ajusta el color según tu diseño */
+}
+
+

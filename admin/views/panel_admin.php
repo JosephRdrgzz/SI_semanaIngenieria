@@ -44,7 +44,7 @@ if ($_SESSION['tipo_usuario'] !== 'admin') {
 <body>
 <div class="admin-panel">
     <h2>Panel de Administración</h2>
-    <p>Bienvenido, <?= htmlspecialchars($_SESSION['nombre']) ?>.</p>
+    <p>Bienvenid@, <?= htmlspecialchars($_SESSION['nombre']) ?>.</p>
 
     <ul>
         <li>
@@ -52,8 +52,12 @@ if ($_SESSION['tipo_usuario'] !== 'admin') {
             <p>Aquí puedes crear, editar y eliminar eventos. Los eventos son actividades que se llevarán a cabo durante la Semana de Ingeniería, como talleres, exposiciones, competencias, etc.</p>
         </li>
         <li>
-            <a href="index.php?view=gestionar_usuarios">Gestionar Usuarios</a>
+            <a href="index.php?view=gestionar_alumnos">Gestionar Alumnos</a>
             <p>En esta sección puedes administrar los alumnos del sistema. Puedes agregar nuevos usuarios, editar la información de los usuarios existentes y eliminar usuarios si es necesario.</p>
+        </li>
+        <li>
+            <a href="index.php?view=gestionar_usuarios">Cargar Alumnos</a>
+            <p>En esta sección puedes cargar los alumnos del sistema. Puedes agregar nuevos usuarios mediante un archivo de tipo csv.</p>
         </li>
         <li>
             <a href="index.php?view=editar_home">Editar Página de Inicio</a>

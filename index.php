@@ -12,6 +12,15 @@ if (isset($_GET['action']) && $_GET['action'] === 'logout') {
 // Determinar la vista a mostrar desde la URL
 $view = isset($_GET['view']) ? $_GET['view'] : 'home';
 
+// Si el usuario está logueado y su perfil no está completo, redirigir a "completar_perfil"
+// Permitimos que se acceda a "login" y "completar_perfil" para que el usuario pueda iniciar sesión y completar su perfil.
+if (isset($_SESSION['id_usuario']) && (!isset($_SESSION['perfil_completo']) || $_SESSION['perfil_completo'] === false)) {
+    if (!in_array($view, ['login', 'completar_perfil'])) {
+        header("Location: index.php?view=completar_perfil");
+        exit();
+    }
+}
+
 // Incluir el header y el navbar una sola vez
 require __DIR__ . '/components/header.php';
 require __DIR__ . '/components/navbar.php';
@@ -33,39 +42,15 @@ switch ($view) {
         require 'views/completar_perfil.php';
         break;
 
-    case 'panel_admin': // Agregar la vista del panel de administrador
-        if ($_SESSION['tipo_usuario'] === 'admin') {
-            require 'views/panel_admin.php';
-        } else {
-            header("Location: index.php?view=home");
-            exit();
-        }
-        break;
-
-    case 'gestionar_eventos': // Agregar la vista de gestión de eventos
-        if ($_SESSION['tipo_usuario'] === 'admin') {
-            require 'views/gestionar_eventos.php';
-        } else {
-            header("Location: index.php?view=home");
-            exit();
-        }
-        break;
-
-    case 'editar':
-        if ($_SESSION['tipo_usuario'] === 'admin') {
-            require 'views/generalidades.php';
-        } else {
-            header("Location: index.php?view=home");
-            exit();
-        }
-        break;
-
-
     default:
         require "views/$view.php";
         break;
 }
 
+// El floating button
+require __DIR__ . '/components/floating.php';
+
 // Incluir el footer solo una vez
 require __DIR__ . '/components/footer.php';
 ?>
+

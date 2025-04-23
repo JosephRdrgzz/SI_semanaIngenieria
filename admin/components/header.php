@@ -6,6 +6,6 @@
     <title>Semana de Ingeniería</title>
     <link rel="stylesheet" href="/semanaIng/admin/styles/styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
-    <script src="/semanaIng/scripts/admin/navbar.js" defer></script>
+    
 </head>
 <body>

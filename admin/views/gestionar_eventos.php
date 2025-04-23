@@ -14,7 +14,15 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['tipo_usuario'] !== 'admin') {
 $query_eventos = "SELECT * FROM evento ORDER BY fecha, hora_inicio";
 $stmt_eventos = $pdo->query($query_eventos);
 $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
+// Consultar los tipos de evento existentes en el ENUM
+$query_tipos = $pdo->query("SELECT unnest(enum_range(NULL::tipo_evento_enum)) AS tipo");
+$tipos_evento = $query_tipos->fetchAll(PDO::FETCH_ASSOC);
+
 ?>
+<!-- Quill Editor -->
+<link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.min.js"></script>
+
 <div class="admin-events-container">
     <h2>Gestión de Eventos</h2>
 
@@ -28,8 +36,36 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
                 <path d="m4 11h16"></path>
             </g>
         </svg>
-        <span class="lable">Agregar Evento</span>
+        <span class="lable">Agregar Nuevo Evento</span>
     </button>
+
+    <!-- Filtros -->
+    <div class="filters" style="margin-top:20px;">
+        <label for="ordenar-fecha">Ordenar por fecha:</label>
+        <button onclick="ordenarEventos('asc')">Más Cercano</button>
+        <button onclick="ordenarEventos('desc')">Más Lejano</button>
+
+        <label for="filtrar-campus" style="margin-left:20px;">Filtrar por campus:</label>
+        <select id="filtrar-campus" onchange="aplicarFiltros()">
+            <option value="">Todos</option>
+            <option value="Norte">Norte</option>
+            <option value="Sur">Sur</option>
+            <option value="Externo">Externo</option>
+        </select>
+
+        <label for="filtrar-tipo" style="margin-left:20px;">Filtrar por tipo de evento:</label>
+        <select id="filtrar-tipo" onchange="aplicarFiltros()">
+            <option value="">Todos</option>
+            <option value="Taller">Taller</option>
+            <option value="Exposición">Exposición</option>
+            <option value="Concurso">Concurso</option>
+            <option value="Conferencia">Conferencia</option>
+            <option value="Oportunidad Laboral">Oportunidad Laboral</option>
+        </select>
+        <button onclick="limpiarFiltros()">Limpiar Filtros</button>
+
+    </div>
+
 
     <!-- Formulario para agregar/editar un evento con estilo "login-box" -->
     <div class="login-box" id="formulario-evento" style="display: none;">
@@ -48,20 +84,25 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
                 </div>
 
                 <!-- Tipo de Evento (sin flotante) -->
+                <!-- Tipo de Evento (sin flotante) -->
                 <div class="user-box no-floating select-box">
                     <label for="tipo_evento">Tipo de Evento</label>
-                    <select name="tipo_evento" id="tipo_evento" required>
+                    <select name="tipo_evento" id="tipo_evento" required onchange="mostrarTipoEventoOtro(this.value)">
                         <option value="">Seleccione un tipo</option>
-                        <option value="Taller">Taller</option>
-                        <option value="Exposición">Exposición</option>
-                        <option value="Concurso">Concurso</option>
-                        <option value="Conferencia">Conferencia</option>
-                        <option value="Oportunidad Laboral">Oportunidad Laboral</option>
+                        <?php foreach ($tipos_evento as $tipo): ?>
+                            <option value="<?= htmlspecialchars($tipo['tipo']) ?>">
+                                <?= htmlspecialchars($tipo['tipo']) ?>
+                            </option>
+                        <?php endforeach; ?>
+                        <option value="otro">Otro</option>
                     </select>
+                    <!-- Campo para especificar el nuevo tipo, oculto por defecto -->
+                    <input type="text" name="tipo_evento_otro" id="tipo_evento_otro" placeholder="Especificar nuevo tipo" style="display:none;">
                 </div>
             </div>
 
-            <div class="two-column">
+
+                <div class="two-column">
                 <!-- Capacidad (sin flotante) -->
                 <div class="user-box no-floating">
                     <label for="capacidad">Capacidad</label>
@@ -108,10 +149,18 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
                 </div>
             </div>
 
-            <!-- Comentario (sin flotante) -->
+            <!-- Comentario (con Quill) -->
             <div class="user-box no-floating textarea-box">
-                <label for="comentario">Comentario</label>
-                <textarea name="comentario" id="comentario"></textarea>
+                <label for="comentario-editor">Comentario</label>
+                <div id="comentario-editor" style="height: 150px;"></div>
+                <input type="hidden" name="comentario" id="comentario">
+            </div>
+
+            <!-- Lineamientos (con Quill) -->
+            <div class="user-box textarea-box">
+                <label for="lineamientos-editor">Lineamientos</label>
+                <div id="lineamientos-editor" style="height: 150px;"></div>
+                <input type="hidden" name="lineamientos" id="lineamientos">
             </div>
 
             <!-- Dirección (con flotante) -->
@@ -120,15 +169,9 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
                 <label>Dirección</label>
             </div>
 
-            <!-- Lineamientos (con flotante) -->
-            <div class="user-box textarea-box">
-                <textarea name="lineamientos" required></textarea>
-                <label>Lineamientos</label>
-            </div>
-
             <!-- Expositor (con flotante) -->
             <div class="user-box">
-                <input type="text" name="expositor" required>
+                <input type="text" name="expositor" >
                 <label>Expositor</label>
             </div>
 
@@ -151,7 +194,7 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <div class="container">
-    <ul class="responsive-table">
+    <ul class="responsive-table" id="tabla-eventos">
         <li class="table-header">
             <div class="col col-1">Nombre</div>
             <div class="col col-2">Tipo</div>
@@ -163,7 +206,10 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
             <div class="col col-8">Acciones</div>
         </li>
         <?php foreach ($eventos as $evento): ?>
-            <li class="table-row">
+            <li class="table-row" data-fecha="<?= htmlspecialchars($evento['fecha']) ?>"
+                data-hora_inicio="<?= htmlspecialchars($evento['hora_inicio']) ?>"
+                data-campus="<?= htmlspecialchars($evento['campus']) ?>"
+                data-tipo="<?= htmlspecialchars($evento['tipo_evento']) ?>">
                 <div class="col col-1" data-label="Nombre"><?= htmlspecialchars($evento['nombre']) ?></div>
                 <div class="col col-2" data-label="Tipo"><?= htmlspecialchars($evento['tipo_evento']) ?></div>
                 <div class="col col-3" data-label="Fecha"><?= htmlspecialchars($evento['fecha']) ?></div>
@@ -193,7 +239,75 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
 </div>
 
 <script>
+    // Inicializar los editores Quill
+    const quillComentario = new Quill('#comentario-editor', {
+        theme: 'snow'
+    });
+    const quillLineamientos = new Quill('#lineamientos-editor', {
+        theme: 'snow'
+    });
+
     let eventos = <?= json_encode($eventos) ?>;
+
+    // Función para aplicar todos los filtros: campus, tipo y hora actual
+    function aplicarFiltros() {
+        const filtroCampus = document.getElementById('filtrar-campus').value;
+        const filtroTipo = document.getElementById('filtrar-tipo').value;
+        const ahora = new Date();
+        const selectCampus = document.getElementById("select-campus");
+        const direccionInput = document.querySelector('[name="direccion"]');
+
+        selectCampus.addEventListener("change", function () {
+            const campus = selectCampus.value;
+            if (campus === "Norte") {
+                direccionInput.value = "Campus Norte\nAv. Universidad Anáhuac 46, Col. Lomas Anáhuac\nHuixquilucan, Estado de México,\nC.P. 52786. +52 (55) 5627 0210";
+            } else if (campus === "Sur") {
+                direccionInput.value = "Campus Sur\nAv. de los Tanques no. 865, Col. Torres de Potrero,\nCiudad de México, Alcaldía Álvaro Obregón,\nMéxico, C.P. 01840. +52 (55) 5628 8800";
+            } else {
+                direccionInput.value = "";
+            }
+        });
+        document.querySelectorAll('#tabla-eventos .table-row').forEach(row => {
+            const campus = row.getAttribute('data-campus');
+            const tipo = row.getAttribute('data-tipo');
+            const fechaEvento = row.getAttribute('data-fecha');
+            const horaInicio = row.getAttribute('data-hora_inicio');
+            const fechaHoraEvento = new Date(fechaEvento + 'T' + horaInicio);
+            let mostrar = true;
+
+            // Filtro por campus
+            if (filtroCampus && campus !== filtroCampus) {
+                mostrar = false;
+            }
+            // Filtro por tipo de evento
+            if (filtroTipo && tipo !== filtroTipo) {
+                mostrar = false;
+            }
+            // Filtro por hora actual (mostrar solo eventos futuros o en curso)
+            if (fechaHoraEvento < ahora) {
+                mostrar = false;
+            }
+            row.style.display = mostrar ? '' : 'none';
+        });
+    }
+
+    // Función para ordenar eventos por fecha
+    function ordenarEventos(orden = 'asc') {
+        const container = document.getElementById('tabla-eventos');
+        const rows = Array.from(container.querySelectorAll('.table-row'));
+        rows.sort((a, b) => {
+            const fechaA = new Date(a.getAttribute('data-fecha') + 'T' + a.getAttribute('data-hora_inicio'));
+            const fechaB = new Date(b.getAttribute('data-fecha') + 'T' + b.getAttribute('data-hora_inicio'));
+            return orden === 'asc' ? fechaA - fechaB : fechaB - fechaA;
+        });
+        // Remontar la lista de eventos
+        rows.forEach(row => container.appendChild(row));
+    }
+
+    // Llamada inicial para aplicar todos los filtros al cargar la página
+    document.addEventListener('DOMContentLoaded', () => {
+        aplicarFiltros();
+    });
 
     function mostrarFormulario() {
         document.getElementById("titulo-formulario").textContent = "Nuevo Evento";
@@ -202,13 +316,19 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
         document.getElementById("formulario-evento").style.display = "block";
         document.getElementById("select-lugar").style.display = "none"; // Oculto por defecto
         document.getElementById("lugar_otro").style.display = "none";
+        // Limpiar campos de Quill
+        quillComentario.setContents([]);
+        quillLineamientos.setContents([]);
+        // Insertar el texto por defecto al crear nuevo evento
+        quillComentario.clipboard.dangerouslyPasteHTML('<p>Comentarios</p>');
+        quillLineamientos.clipboard.dangerouslyPasteHTML('<p>Lineamientos</p>');
     }
 
     function ocultarFormulario() {
         document.getElementById("formulario-evento").style.display = "none";
     }
 
-    // Al cambiar el campus, cargamos salones o mostramos "otro"
+    // Al cambiar el campus en el formulario, cargamos salones o mostramos "otro"
     document.getElementById("select-campus").addEventListener("change", function() {
         let campus = this.value;
         let selectLugar = document.getElementById("select-lugar");
@@ -223,7 +343,7 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
             // Mostramos y requerimos el input "lugar_otro"
             otroInput.style.display = "block";
             otroInput.required = true;
-            otroInput.value = ""; // Limpia el valor anterior si lo hubiera
+            otroInput.value = "";
         } else {
             // Ocultamos el input "lugar_otro"
             otroInput.style.display = "none";
@@ -238,26 +358,23 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
             fetch(`actions/obtener_salones.php?campus=${campus}`)
                 .then(response => response.json())
                 .then(data => {
-                    // Creamos opciones a partir de los salones
                     let opciones = data.map(salon =>
                         `<option value="${salon.id_salon}">${salon.id_salon} - Capacidad ${salon.capacidad}</option>`
                     );
-                    // Agregamos la opción "otro" al final
                     opciones.push('<option value="otro">Otro</option>');
-                    // Asignamos al select
                     selectLugar.innerHTML = opciones.join('');
                 })
                 .catch(error => console.error("Error al obtener salones:", error));
         }
     });
 
-    // Al cambiar el lugar, si es "otro", mostramos input
+    // Al cambiar el lugar, si es "otro", mostramos el input
     document.getElementById("select-lugar").addEventListener("change", function() {
         let otroInput = document.getElementById("lugar_otro");
         if (this.value === "otro") {
             otroInput.style.display = "block";
             otroInput.required = true;
-            otroInput.value = ""; // Limpia en caso de re-seleccionar
+            otroInput.value = "";
         } else {
             otroInput.style.display = "none";
             otroInput.required = false;
@@ -268,6 +385,8 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
     // Guardar evento (submit)
     document.getElementById("form-evento").addEventListener("submit", function(e) {
         e.preventDefault();
+        document.getElementById('comentario').value = quillComentario.root.innerHTML;
+        document.getElementById('lineamientos').value = quillLineamientos.root.innerHTML;
         let formData = new FormData(this);
         let id_evento = formData.get("id_evento");
         let url = id_evento ? "actions/editar_evento.php" : "actions/agregar_evento.php";
@@ -278,7 +397,6 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
         })
             .then(response => response.json())
             .then(data => {
-
                 if (data.success) {
                     alert(data.success);
                     location.reload();
@@ -296,7 +414,6 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
             alert("Error: No se encontró el evento.");
             return;
         }
-
         document.getElementById("titulo-formulario").textContent = "Editar Evento";
         document.querySelector("[name='id_evento']").value = id;
         document.querySelector("[name='nombre']").value = evento.nombre;
@@ -306,15 +423,12 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
         document.querySelector("[name='hora_inicio']").value = evento.hora_inicio;
         document.querySelector("[name='hora_fin']").value = evento.hora_fin;
         document.querySelector("[name='campus']").value = evento.campus;
-        document.querySelector("[name='comentario']").value = evento.comentario;
+        quillComentario.root.innerHTML = evento.comentario || "";
+        quillLineamientos.root.innerHTML = evento.lineamientos || "";
         document.querySelector("[name='direccion']").value = evento.direccion;
-        document.querySelector("[name='lineamientos']").value = evento.lineamientos;
         document.querySelector("[name='expositor']").value = evento.expositor;
 
-        // Mostrar formulario
         document.getElementById("formulario-evento").style.display = "block";
-
-        // Campus externo o no
         let selectLugar = document.getElementById("select-lugar");
         let otroInput = document.getElementById("lugar_otro");
 
@@ -325,24 +439,19 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
             otroInput.required = true;
             otroInput.value = evento.lugar;
         } else {
-            // Cargar salones
             fetch(`actions/obtener_salones.php?campus=${evento.campus}`)
                 .then(response => response.json())
                 .then(data => {
                     selectLugar.innerHTML = data.map(salon =>
                         `<option value="${salon.id_salon}">${salon.id_salon} - Capacidad ${salon.capacidad}</option>`
                     ).join('') + '<option value="otro">Otro</option>';
-
                     selectLugar.style.display = "block";
                     selectLugar.required = true;
                     otroInput.style.display = "none";
                     otroInput.required = false;
-
-                    // Verificar si la opción (salón) está en la lista
                     if (selectLugar.querySelector(`option[value='${evento.lugar}']`)) {
                         selectLugar.value = evento.lugar;
                     } else {
-                        // Caso "otro"
                         selectLugar.value = "otro";
                         otroInput.style.display = "block";
                         otroInput.required = true;
@@ -351,8 +460,6 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
                 })
                 .catch(error => console.error("Error al obtener salones:", error));
         }
-
-        // Scroll suave hacia el formulario
         document.getElementById("formulario-evento").scrollIntoView({ behavior: "smooth" });
     }
 
@@ -379,4 +486,69 @@ $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
     }
 
     document.addEventListener('DOMContentLoaded', initFloatingLabels);
+
+    function limpiarFiltros() {
+        document.getElementById('filtrar-campus').value = '';
+        document.getElementById('filtrar-tipo').value = '';
+        aplicarFiltros();
+    }
+    function mostrarTipoEventoOtro(valor) {
+        const inputOtro = document.getElementById('tipo_evento_otro');
+        if (valor === 'otro') {
+            inputOtro.style.display = 'block';
+            inputOtro.required = true;
+        } else {
+            inputOtro.style.display = 'none';
+            inputOtro.required = false;
+            inputOtro.value = '';
+        }
+    }
+
+
+
 </script>
+
+<style>
+    /* Estilos para los editores Quill */
+    #comentario-editor .ql-toolbar,
+    #lineamientos-editor .ql-toolbar,
+    #comentario-editor .ql-container,
+    #lineamientos-editor .ql-container {
+        all: initial;
+        font-family: sans-serif;
+        font-size: 14px;
+        width: 100%;
+        box-sizing: border-box;
+        color: #ffffff;
+    }
+    #comentario-editor .ql-editor,
+    #lineamientos-editor .ql-editor {
+        padding: 12px;
+        color: #ffffff;
+        font-size: 14px;
+        min-height: 120px;
+        box-sizing: border-box;
+        text-align: left !important;
+        background-color: #1e1e1e;
+    }
+    #comentario-editor .ql-toolbar,
+    #lineamientos-editor .ql-toolbar {
+        background-color: #2c2c2c;
+        border: none;
+    }
+    /* Estilo para el select */
+    select {
+        background-color: #333; /* Fondo oscuro */
+        color: white; /* Texto blanco */
+        border: 1px solid #ccc;
+        padding: 5px;
+        border-radius: 4px;
+    }
+
+    /* Estilo para las opciones del select */
+    select option {
+        background-color: #333; /* Fondo oscuro */
+        color: white; /* Texto blanco */
+    }
+</style>
+

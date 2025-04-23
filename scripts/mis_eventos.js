@@ -27,7 +27,14 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(response => response.json())
             .then(eventos => {
                 contenedorEventos.innerHTML = "";
+                // Obtener el tiempo actual en CDMX usando la zona horaria
+                const nowCDMX = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Mexico_City" }));
                 eventos.forEach(evento => {
+                    // Construir la fecha de inicio del evento con offset fijo -06:00 (CDMX en horario estándar)
+                    const eventStart = new Date(`${evento.fecha}T${evento.hora_inicio}-06:00`);
+                    // Se asigna la propiedad cancelable según la comparación
+                    evento.cancelable = (eventStart > nowCDMX);
+
                     if (filtrarEvento(evento)) {
                         const card = document.createElement("div");
                         card.classList.add("card");
@@ -39,7 +46,10 @@ document.addEventListener("DOMContentLoaded", function () {
                             <p class="p"><strong>Horario:</strong> ${evento.hora_inicio} - ${evento.hora_fin}</p>
                             <p class="p"><strong>Lugar:</strong> ${evento.lugar}</p>
                             <p class="p"><strong>Campus:</strong> ${evento.campus}</p>
-                            ${evento.cancelable ? `<button class="cancelar-btn" data-id="${evento.id}">Cancelar</button>` : "<p>Evento pasado - No se puede cancelar</p>"}
+                            <a href="index.php?view=informacion_mi_evento&id=${evento.id}" class="delete-button">Más Información</a>
+                            ${evento.cancelable
+                            ? `<a href="#" class="info-button cancelar-btn" data-id="${evento.id}">Cancelar</a>`
+                            : "<p>Evento pasado - No se puede cancelar</p>"}
                         </div>
                     `;
                         contenedorEventos.appendChild(card);
@@ -57,7 +67,6 @@ document.addEventListener("DOMContentLoaded", function () {
         const campusSeleccionado = filtroCampus.value;
         const estadoSeleccionado = filtroEstado.value;
         const esCancelable = evento.cancelable;
-
         return (campusSeleccionado === "" || evento.campus === campusSeleccionado) &&
             (estadoSeleccionado === "todos" ||
                 (estadoSeleccionado === "vigentes" && esCancelable) ||
@@ -86,3 +95,4 @@ document.addEventListener("DOMContentLoaded", function () {
 
     cargarMisEventos();
 });
+
