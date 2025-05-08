@@ -53,49 +53,77 @@ document.addEventListener("DOMContentLoaded", function () {
     // Carga y filtra eventos
     function cargarEventos() {
         fetch("actions/eventos.php")
-            .then(response => response.json())
+            .then(r => r.json())
             .then(data => {
-                // 1) Limpiar el contenedor de eventos
                 contenedorEventos.innerHTML = "";
+                // si viene debug/result...
+                const eventos = data.result || data;
 
-                console.log("Eventos parseados:", data);
-                const eventos = data.result ? data.result : data;
+                // 1) Filtramos sólo los que pasan el filtro general
+                const filtrados = eventos.filter(filtrarEvento);
 
-                // 2) Renderizar solo los eventos que pasen el filtro
-                eventos.forEach(evento => {
-                    if (filtrarEvento(evento)) {
-                        const card = document.createElement("div");
-                        card.classList.add("card");
-                        card.innerHTML = `
-                        <div class="img">
-                            <div class="save">
-                                <input type="checkbox" name="eventos" value="${evento.id}" class="svg">
-                            </div>
-                        </div>
-                        <div class="text">
-                            <h3 class="h3">${evento.nombre}</h3>
-                            <p class="p"><strong>Fecha:</strong> ${evento.fecha}</p>
-                            <p class="p"><strong>Horario:</strong> ${evento.hora_inicio} - ${evento.hora_fin}</p>
-                            <p class="p"><strong>Lugar:</strong> ${evento.lugar}</p>
-                            <p class="p"><strong>Campus:</strong> ${evento.campus}</p>
-                            <p class="p"><strong>Tipo:</strong> ${evento.tipo_evento}</p>
-                        </div>
-                        <a href="index.php?view=detalles_evento&id=${evento.id}" class="info-button">Más Información</a>
-                    `;
-                        contenedorEventos.appendChild(card);
-                    }
-                });
+                // 2) Separamos en dos arrays
+                const conImagen    = filtrados.filter(e => e.has_image);
+                const sinImagen    = filtrados.filter(e => !e.has_image);
 
-                // 3) Volver a configurar checkboxes y carrito
+                // Función auxiliar para crear y añadir la tarjeta
+                function crearCard(evento) {
+                    const card = document.createElement("div");
+                    card.classList.add("card");
+
+                    // Si tiene imagen, anulamos la altura fija y mantenemos el contexto para .save
+                    const imgInlineStyle = evento.has_image
+                        ? 'style="display:block; position:relative; height:auto;"'
+                        : "";
+
+                    card.innerHTML = `
+    <div class="img" ${imgInlineStyle}>
+      ${ evento.has_image
+                        ? `<img
+              src="admin/${evento.imagen_path}"
+              alt="${evento.nombre}"
+              style="
+                display: block;
+                width: 100%;
+                height: auto;
+                object-fit: cover;
+                border-top-left-radius: 30px;
+                border-top-right-radius: 30px;
+              "
+            >`
+                        : `` }
+      <div class="save">
+        <input type="checkbox" name="eventos" value="${evento.id}">
+      </div>
+    </div>
+    <div class="text">
+      <h3 class="h3">${evento.nombre}</h3>
+      <p class="p"><strong>Fecha:</strong> ${evento.fecha}</p>
+      <p class="p"><strong>Horario:</strong> ${evento.hora_inicio} - ${evento.hora_fin}</p>
+      <p class="p"><strong>Lugar:</strong> ${evento.lugar}</p>
+      <p class="p"><strong>Campus:</strong> ${evento.campus}</p>
+      <p class="p"><strong>Tipo:</strong> ${evento.tipo_evento}</p>
+    </div>
+    <a href="index.php?view=detalles_evento&id=${evento.id}" class="info-button">
+      Más Información
+    </a>
+  `;
+
+                    contenedorEventos.appendChild(card);
+                }
+                // 3) Primero tarjetas CON imagen
+                conImagen.forEach(crearCard);
+
+                // 4) Luego tarjetas SIN imagen
+                sinImagen.forEach(crearCard);
+
+                // 5) Reconfiguramos checkbox/carrito
                 agregarEventListenersCheckboxes();
                 actualizarCarrito();
                 mostrarCarritoSiHayEventosSeleccionados();
             })
-            .catch(error => {
-                console.error("Error al cargar eventos:", error);
-            });
+            .catch(e => console.error("Error cargando eventos:", e));
     }
-
     // Filtra un evento según campus, fecha y tipo
     function filtrarEvento(evento) {
         const campusSeleccionado = filtroCampus.value;
@@ -179,3 +207,4 @@ document.addEventListener("DOMContentLoaded", function () {
     cargarTiposEvento();
     cargarEventos();
 });
+

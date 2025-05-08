@@ -115,6 +115,22 @@
             font-weight: 600;
             font-size: 0.9rem;
         }
+        /* Lugar donde irá la imagen */
+        .card-media {
+            width: 100%;
+            height: 160px;               /* Altura fija para todas */
+            overflow: hidden;            /* Recorta lo que se salga */
+            border-top-left-radius: 6px; /* Match con .card */
+            border-top-right-radius: 6px;
+        }
+
+        /* Imagen escalada y centrada */
+        .card-media img {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;           /* Rellena sin deformar */
+        }
 
         /* Badges de campus */
         .evento-badge {
@@ -285,4 +301,3 @@
         });
     });
 </script>
-

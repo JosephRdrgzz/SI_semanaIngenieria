@@ -13,79 +13,119 @@
 
         <!-- Menú horizontal (pantallas grandes) -->
         <nav class="my-navbar-links" id="navbarLinks">
-            <?php if (isset($_SESSION['id_usuario']) && $_SESSION['tipo_usuario'] === 'admin'): ?>
+            <?php if(isset($_SESSION['id_usuario']) && $_SESSION['tipo_usuario']==='admin'): ?>
                 <a class="my-navbar-btn" href="index.php?view=panel_admin">PANEL</a>
 
-                <!-- Submenú DISCRETO -->
+                <!-- PÁGINAS -->
                 <div class="my-navbar-dropdown">
-                    <!-- Botón principal -->
-                    <button class="my-navbar-btn">
-                        PÁGINAS &#9662;
-                    </button>
-                    <!-- Contenido del submenú -->
+                    <button class="my-navbar-btn">PÁGINAS &#9662;</button>
                     <div class="my-navbar-dropdown-content">
-                        <a href="index.php?view=editar_home">INICIO (EDITAR)</a>
-                        <a href="index.php?view=generalidades">GENERALIDADES</a>
-                        <a href="index.php?view=contacto">CONTACTO</a>
+                        <?php if(!empty($_SESSION['is_super']) || in_array('editar_home', $_SESSION['permisos'] ?? [], true)): ?>
+                            <a href="index.php?view=editar_home">INICIO (EDITAR)</a>
+                        <?php endif; ?>
+                        <?php if(!empty($_SESSION['is_super']) || in_array('generalidades', $_SESSION['permisos'] ?? [], true)): ?>
+                            <a href="index.php?view=generalidades">GENERALIDADES</a>
+                        <?php endif; ?>
+                        <?php if(!empty($_SESSION['is_super']) || in_array('contacto', $_SESSION['permisos'] ?? [], true)): ?>
+                            <a href="index.php?view=contacto">CONTACTO</a>
+                        <?php endif; ?>
                     </div>
                 </div>
-                <!-- Submenú DISCRETO -->
+
+                <!-- GESTIÓN -->
                 <div class="my-navbar-dropdown">
-                    <!-- Botón principal -->
-                    <button class="my-navbar-btn">
-                        GESTIÓN &#9662;
-                    </button>
-                    <!-- Contenido del submenú -->
+                    <button class="my-navbar-btn">GESTIÓN &#9662;</button>
                     <div class="my-navbar-dropdown-content">
-                        <a class="my-navbar-btn"  href="index.php?view=gestionar_usuarios">CARGAR ALUMNOS</a>
-                        <a class="my-navbar-btn"  href="index.php?view=cargar_salones">CARGAR SALONES</a>
-                        <a class="my-navbar-btn"  href="index.php?view=gestionar_alumnos">GESTIONAR ALUMNOS</a>
-			<a class="my-navbar-btn" href="index.php?view=gestionar_eventos">GESTIONAR EVENTOS</a>
-			<a class="my-navbar-btn" href="index.php?view=gestionar_pasados">GESTIONAR EVENTOS PASADOS</a>
-		    </div>
+                        <?php if(!empty($_SESSION['is_super']) || in_array('gestionar_usuarios', $_SESSION['permisos'] ?? [], true)): ?>
+                            <a href="index.php?view=gestionar_usuarios">CARGAR ALUMNOS</a>
+                        <?php endif; ?>
+                        <?php if(!empty($_SESSION['is_super']) || in_array('gestionar_salones', $_SESSION['permisos'] ?? [], true)): ?>
+                            <a href="index.php?view=gestionar_salones">GESTIONAR SALONES</a>
+                        <?php endif; ?>
+                        <?php if(!empty($_SESSION['is_super']) || in_array('gestionar_alumnos', $_SESSION['permisos'] ?? [], true)): ?>
+                            <a href="index.php?view=gestionar_alumnos">GESTIONAR ALUMNOS</a>
+                        <?php endif; ?>
+                        <?php if(!empty($_SESSION['is_super']) || in_array('gestionar_eventos', $_SESSION['permisos'] ?? [], true)): ?>
+                            <a href="index.php?view=gestionar_eventos">GESTIONAR EVENTOS</a>
+                        <?php endif; ?>
+                        <?php if(!empty($_SESSION['is_super']) || in_array('gestionar_pasados', $_SESSION['permisos'] ?? [], true)): ?>
+                            <a href="index.php?view=gestionar_pasados">GESTIONAR EVENTOS PASADOS</a>
+                        <?php endif; ?>
+
+                        <!-- Solo super-admin -->
+                        <?php if(!empty($_SESSION['is_super'])): ?>
+                            <a href="index.php?view=gestionar_administradores">GESTIONAR ADMINISTRADORES</a>
+                        <?php endif; ?>
+                    </div>
                 </div>
 
                 <a class="my-navbar-btn" href="index.php?action=logout">CERRAR SESIÓN</a>
 
-            <?php elseif (isset($_SESSION['id_usuario'])): ?>
+            <?php elseif(isset($_SESSION['id_usuario'])): ?>
                 <!-- Usuario normal -->
-                <a class="my-navbar-btn" href="index.php?view=editar_perfil&exp=<?= $_SESSION['usuario']['exp'] ?>">
-                    <?= $_SESSION['usuario']['nombre'] ?>
+                <a class="my-navbar-btn"
+                   href="index.php?view=editar_perfil&exp=<?=htmlspecialchars($_SESSION['usuario']['exp'])?>">
+                    <?=htmlspecialchars($_SESSION['usuario']['nombre'])?>
                 </a>
                 <a class="my-navbar-btn" href="index.php?action=logout">CERRAR SESIÓN</a>
+
             <?php else: ?>
-                <!-- Invitado (sin sesión) -->
+                <!-- Invitado -->
                 <a class="my-navbar-btn" href="index.php?view=login">INICIAR SESIÓN</a>
             <?php endif; ?>
         </nav>
 
-        <!-- Botón hamburguesa (visible en móviles) -->
+        <!-- Botón hamburguesa (móviles) -->
         <button class="my-hamburger" id="hamburger">&#9776;</button>
     </div>
 </div>
-
 <!-- OVERLAY (menú para móviles) -->
 <div class="my-overlay" id="myOverlay">
     <button class="my-overlay-close" id="overlayClose">&times;</button>
     <nav class="my-overlay-menu">
-        <?php if (isset($_SESSION['id_usuario']) && $_SESSION['tipo_usuario'] === 'admin'): ?>
+        <?php if(isset($_SESSION['id_usuario']) && $_SESSION['tipo_usuario']==='admin'): ?>
             <a class="my-overlay-link" href="index.php?view=panel_admin">PANEL</a>
-            <!-- Items del submenú en desktop se muestran en lista normal en móvil -->
-            <a class="my-overlay-link" href="index.php?view=editar_home">INICIO (EDITAR)</a>
-            <a class="my-overlay-link" href="index.php?view=generalidades">GENERALIDADES</a>
-            <a class="my-overlay-link" href="index.php?view=contacto">CONTACTO</a>
-	    <a class="my-overlay-link" href="index.php?view=gestionar_eventos">GESTIONAR EVENTOS</a>
-            <a class="my-overlay-link" href="index.php?view=gestionar_pasados">GESTIONAR EVENTOS PASADOS</a>
-            <a class="my-overlay-link" href="index.php?view=gestionar_alumnos">GESTIONAR ALUMNOS</a>
-            <a class="my-overlay-link" href="index.php?view=gestionar_usuarios">CARGAR ALUMNOS</a>
-            <a class="my-overlay-link"  href="index.php?view=cargar_salones">CARGAR SALONES</a>
-	    <a class="my-overlay-link" href="index.php?action=logout">CERRAR SESIÓN</a>
+            <?php if(!empty($_SESSION['is_super']) || in_array('editar_home', $_SESSION['permisos'] ?? [], true)): ?>
+                <a class="my-overlay-link" href="index.php?view=editar_home">INICIO (EDITAR)</a>
+            <?php endif; ?>
+            <?php if(!empty($_SESSION['is_super']) || in_array('generalidades', $_SESSION['permisos'] ?? [], true)): ?>
+                <a class="my-overlay-link" href="index.php?view=generalidades">GENERALIDADES</a>
+            <?php endif; ?>
+            <?php if(!empty($_SESSION['is_super']) || in_array('contacto', $_SESSION['permisos'] ?? [], true)): ?>
+                <a class="my-overlay-link" href="index.php?view=contacto">CONTACTO</a>
+            <?php endif; ?>
 
-        <?php elseif (isset($_SESSION['id_usuario'])): ?>
-            <a class="my-overlay-link" href="index.php?view=editar_perfil&exp=<?= $_SESSION['usuario']['exp'] ?>">
-                <?= $_SESSION['usuario']['nombre'] ?>
+            <?php if(!empty($_SESSION['is_super']) || in_array('gestionar_eventos', $_SESSION['permisos'] ?? [], true)): ?>
+                <a class="my-overlay-link" href="index.php?view=gestionar_eventos">GESTIONAR EVENTOS</a>
+            <?php endif; ?>
+            <?php if(!empty($_SESSION['is_super']) || in_array('gestionar_pasados', $_SESSION['permisos'] ?? [], true)): ?>
+                <a class="my-overlay-link" href="index.php?view=gestionar_pasados">GESTIONAR PASADOS</a>
+            <?php endif; ?>
+            <?php if(!empty($_SESSION['is_super']) || in_array('gestionar_salones', $_SESSION['permisos'] ?? [], true)): ?>
+                <a class="my-overlay-link" href="index.php?view=gestionar_salones">GESTIONAR SALONES</a>
+            <?php endif; ?>
+            <?php if(!empty($_SESSION['is_super']) || in_array('gestionar_alumnos', $_SESSION['permisos'] ?? [], true)): ?>
+                <a class="my-overlay-link" href="index.php?view=gestionar_alumnos">GESTIONAR ALUMNOS</a>
+            <?php endif; ?>
+            <?php if(!empty($_SESSION['is_super']) || in_array('gestionar_usuarios', $_SESSION['permisos'] ?? [], true)): ?>
+                <a class="my-overlay-link" href="index.php?view=gestionar_usuarios">CARGAR ALUMNOS</a>
+            <?php endif; ?>
+
+            <?php if(!empty($_SESSION['is_super'])): ?>
+                <a class="my-overlay-link" href="index.php?view=gestionar_administradores">
+                    GESTIONAR ADMINISTRADORES
+                </a>
+            <?php endif; ?>
+
+            <a class="my-overlay-link" href="index.php?action=logout">CERRAR SESIÓN</a>
+
+        <?php elseif(isset($_SESSION['id_usuario'])): ?>
+            <a class="my-overlay-link"
+               href="index.php?view=editar_perfil&exp=<?=htmlspecialchars($_SESSION['usuario']['exp'])?>">
+                <?=htmlspecialchars($_SESSION['usuario']['nombre'])?>
             </a>
             <a class="my-overlay-link" href="index.php?action=logout">CERRAR SESIÓN</a>
+
         <?php else: ?>
             <a class="my-overlay-link" href="index.php?view=login">INICIAR SESIÓN</a>
         <?php endif; ?>
@@ -340,5 +380,6 @@
     }
 
 </style>
+
 
 

@@ -1,91 +1,90 @@
 <?php
 session_start();
 require_once __DIR__ . '/../config/conexion.php';
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-// Verificar que se ha enviado el campo "usuario"
-if (!isset($_POST['usuario']) || empty(trim($_POST['usuario']))) {
+// 1) Verificar campo usuario
+if (empty(trim($_POST['usuario']))) {
     $_SESSION['error'] = "Se requiere ID o correo.";
     header("Location: ../index.php?view=login");
     exit();
 }
-
 $usuario = trim($_POST['usuario']);
-$isEmail = (strpos($usuario, '@') !== false); // Si contiene @ se trata de correo
+$isEmail = strpos($usuario, '@') !== false;
 
-// Primero, buscar en la tabla alumnos
+// 2) Intentar login como alumno
 if ($isEmail) {
-    $query = $pdo->prepare("SELECT exp, nombre, mail, campus, semestre, celular, telefono, responsable 
-                            FROM alumnos WHERE mail = :usuario");
+    $sql = "SELECT exp,nombre,mail,campus,semestre,celular,telefono,responsable
+            FROM alumnos WHERE mail = :u";
 } else {
-    $query = $pdo->prepare("SELECT exp, nombre, mail, campus, semestre, celular, telefono, responsable 
-                            FROM alumnos WHERE exp = :usuario");
+    $sql = "SELECT exp,nombre,mail,campus,semestre,celular,telefono,responsable
+            FROM alumnos WHERE exp = :u";
 }
-$query->execute(['usuario' => $usuario]);
-$user = $query->fetch(PDO::FETCH_ASSOC);
-
-if ($user) {
-    // Iniciar sesión como alumno
-    $_SESSION['id_usuario'] = $user['exp'];
-    $_SESSION['nombre'] = $user['nombre'];
-    $_SESSION['semestre'] = $user['semestre'];
-    $_SESSION['usuario'] = $user;
+$stmt = $pdo->prepare($sql);
+$stmt->execute(['u' => $usuario]);
+if ($user = $stmt->fetch(PDO::FETCH_ASSOC)) {
+    $_SESSION['id_usuario']   = $user['exp'];
+    $_SESSION['nombre']       = $user['nombre'];
     $_SESSION['tipo_usuario'] = 'alumno';
-
-    // Verificar si faltan datos
-    $valores = [$user['mail'], $user['campus'], $user['semestre'], $user['celular'], $user['telefono'], $user['responsable']];
-    $datosIncompletos = in_array(null, $valores) || in_array('', $valores);
-    if ($datosIncompletos) {
-        $_SESSION['datosFaltantes'] = true;
-        header("Location: ../index.php?view=completar_perfil");
-        exit();
-    }
     header("Location: ../index.php?view=home");
-    exit();
+    exit;
 }
 
-// Si no es alumno, buscar en administradores
+// 3) Intentar login como administrador
 if ($isEmail) {
-    $query = $pdo->prepare("SELECT exp, nombre, correo, contraseña FROM administradores WHERE correo = :usuario");
+    $sql = "SELECT exp,nombre,correo,contraseña,is_super
+            FROM administradores WHERE correo = :u";
 } else {
-    $query = $pdo->prepare("SELECT exp, nombre, correo, contraseña FROM administradores WHERE exp = :usuario");
+    $sql = "SELECT exp,nombre,correo,contraseña,is_super
+            FROM administradores WHERE exp = :u";
 }
-$query->execute(['usuario' => $usuario]);
-$admin = $query->fetch(PDO::FETCH_ASSOC);
-
-if (!$admin) {
+$stmt = $pdo->prepare($sql);
+$stmt->execute(['u' => $usuario]);
+$adm = $stmt->fetch(PDO::FETCH_ASSOC);
+if (!$adm) {
     $_SESSION['error'] = "Usuario no encontrado.";
     header("Location: ../index.php?view=login");
-    exit();
+    exit;
 }
 
-// Verificar que se envió la contraseña
-if (!isset($_POST['contraseña']) || empty(trim($_POST['contraseña']))) {
-    $_SESSION['admin_usuario'] = $usuario;
-    $_SESSION['admin_nombre'] = $admin['nombre'];
-    $_SESSION['admin_pending'] = true; // Necesita ingresar contraseña
-    $_SESSION['error'] = "Contraseña requerida para administradores.";
+// 4) Verificar contraseña
+if (empty(trim($_POST['contraseña']))) {
+    $_SESSION['error'] = "Contraseña requerida.";
     header("Location: ../index.php?view=login");
-    exit();
+    exit;
 }
-
-$passIngresada = trim($_POST['contraseña']);
-$hashIngresado = hash('sha256', $passIngresada);
-
-if ($hashIngresado !== $admin['contraseña']) {
+$hashIn = hash('sha256', trim($_POST['contraseña']));
+if ($hashIn !== $adm['contraseña']) {
     $_SESSION['error'] = "Contraseña incorrecta.";
     header("Location: ../index.php?view=login");
-    exit();
+    exit;
 }
 
-// Iniciar sesión como administrador
-$_SESSION['id_usuario'] = $admin['exp'];
-$_SESSION['nombre'] = $admin['nombre'];
-$_SESSION['tipo_usuario'] = 'admin';
+// 5) Sesión de administrador
+$_SESSION['id_usuario']   = $adm['exp'];
+$_SESSION['nombre']       = $adm['nombre'];
+$_SESSION['tipo_usuario'] = 'admin';               // SIEMPRE 'admin'
+$_SESSION['is_super']     = (bool)$adm['is_super']; // true/false limpio
 
-// Limpiar variables temporales
-unset($_SESSION['admin_usuario'], $_SESSION['admin_nombre'], $_SESSION['admin_pending']);
+// 6) Cargar permisos
+if ($_SESSION['is_super']) {
+    // Súper-admin ve TODO
+    $_SESSION['permisos'] = $pdo
+      ->query("SELECT nombre FROM vistas")
+      ->fetchAll(PDO::FETCH_COLUMN);
+} else {
+    // Admin normal: sólo los suyos
+    $p = $pdo->prepare("
+      SELECT v.nombre
+        FROM vistas v
+        JOIN admin_vistas av ON av.vista_id = v.id
+       WHERE av.admin_exp = :e
+    ");
+    $p->execute(['e' => $adm['exp']]);
+    $_SESSION['permisos'] = $p->fetchAll(PDO::FETCH_COLUMN);
+}
 
+// 7) Redirigir al panel
 header("Location: ../index.php?view=panel_admin");
-exit();
-?>
-
+exit;

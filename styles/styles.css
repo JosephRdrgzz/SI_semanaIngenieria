@@ -244,18 +244,35 @@ a {
     display: flex;
     align-items: top;
     justify-content: right;
+    position: relative; /* Added for positioning the checkbox */
+    overflow: hidden; /* Ensures no extra content is visible */
+}
+
+.img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures the image covers the entire area */
+    border-top-left-radius: 30px;
+    border-top-right-radius: 30px;
+}
+
+.img.has-image {
+    background: none; /* Removes the gradient if there's an image */
 }
 
 .save {
+    position: absolute; /* Positions the checkbox on top of the image */
+    top: 10px;
+    right: 10px;
     transition: 0.2s ease-in-out;
     border-radius: 10px;
-    margin: 20px;
     width: 30px;
     height: 30px;
     background-color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 2; /* Ensures it appears above the image */
 }
 
 .text {
@@ -596,4 +613,19 @@ a {
 }
 #contenedor-mis-eventos .card .text h3 {
     margin-top: 0;
+}
+
+
+/* Cuando tenga imagen, anulas degradado y altura fija */
+.img.has-image {
+    background: none;
+    height: auto;
+}
+
+/* El <img> siempre al 100% de ancho */
+.img.has-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    object-fit: cover;
 }

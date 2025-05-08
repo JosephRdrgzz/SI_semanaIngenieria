@@ -3,8 +3,8 @@ if ($_SESSION['tipo_usuario'] !== 'admin') {
     header("Location: index.php?view=home");
     exit();
 }
-?>
 
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>

@@ -5,13 +5,23 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Verificar que el usuario es administrador
-if (!isset($_SESSION['id_usuario']) || $_SESSION['tipo_usuario'] !== 'admin') {
+if (!isset($_SESSION['id_usuario']) || $_SESSION['tipo_usuario'] !== 'admin' && $_SESSION['tipo_usuario']!=='super') {
     header("Location: index.php?view=login");
     exit();
 }
 
 // Obtener eventos desde la base de datos
-$query_eventos = "SELECT * FROM evento ORDER BY fecha, hora_inicio";
+$query_eventos = "
+  SELECT
+    id, nombre, tipo_evento, capacidad,
+    fecha, hora_inicio, hora_fin,
+    lugar, campus, comentario,
+    direccion, lineamientos, expositor,
+    imagen_path,
+    (imagen_path IS NOT NULL AND imagen_path <> '') AS has_image
+  FROM evento
+  ORDER BY fecha, hora_inicio
+";
 $stmt_eventos = $pdo->query($query_eventos);
 $eventos = $stmt_eventos->fetchAll(PDO::FETCH_ASSOC);
 // Consultar los tipos de evento existentes en el ENUM
@@ -149,6 +159,18 @@ $tipos_evento = $query_tipos->fetchAll(PDO::FETCH_ASSOC);
                 </div>
             </div>
 
+            <div class="two-column">
+                <div class="user-box no-floating">
+                    <label for="imagen">Imagen del Evento</label>
+                    <input type="file" name="imagen" id="imagen" accept="image/*">
+                </div>
+                <div id="preview-imagen" class="user-box no-floating">
+                    <em>No hay imagen asignada.</em>
+                </div>
+                <input type="hidden" name="remove_image" id="remove_image" value="0">
+            </div>
+
+
             <!-- Comentario (con Quill) -->
             <div class="user-box no-floating textarea-box">
                 <label for="comentario-editor">Comentario</label>
@@ -206,6 +228,15 @@ $tipos_evento = $query_tipos->fetchAll(PDO::FETCH_ASSOC);
             <div class="col col-8">Acciones</div>
         </li>
         <?php foreach ($eventos as $evento): ?>
+            <?php
+            // Se crea el objeto DateTime con zona fija CDMX (-06:00)
+            $fechaHoraEvento = new DateTime($evento['fecha'] . ' ' . $evento['hora_inicio'] . ' -06:00');
+            $ahora = new DateTime('now', new DateTimeZone('-06:00'));
+            // Solo se muestran eventos que ya han iniciado o pasado
+            if ($fechaHoraEvento < $ahora) {
+                continue;
+            }
+            ?>
             <li class="table-row" data-fecha="<?= htmlspecialchars($evento['fecha']) ?>"
                 data-hora_inicio="<?= htmlspecialchars($evento['hora_inicio']) ?>"
                 data-campus="<?= htmlspecialchars($evento['campus']) ?>"
@@ -383,6 +414,7 @@ $tipos_evento = $query_tipos->fetchAll(PDO::FETCH_ASSOC);
     });
 
     // Guardar evento (submit)
+    // Guardar evento (submit)
     document.getElementById("form-evento").addEventListener("submit", function(e) {
         e.preventDefault();
         document.getElementById('comentario').value = quillComentario.root.innerHTML;
@@ -409,60 +441,123 @@ $tipos_evento = $query_tipos->fetchAll(PDO::FETCH_ASSOC);
 
     // Editar evento
     function editarEvento(id) {
-        let evento = eventos.find(e => e.id == id);
+        const evento = eventos.find(e => e.id == id);
         if (!evento) {
-            alert("Error: No se encontró el evento.");
-            return;
+            return alert("Error: No se encontró el evento.");
         }
+
+        // 1) Título y campos básicos
         document.getElementById("titulo-formulario").textContent = "Editar Evento";
-        document.querySelector("[name='id_evento']").value = id;
-        document.querySelector("[name='nombre']").value = evento.nombre;
-        document.querySelector("[name='tipo_evento']").value = evento.tipo_evento;
+        document.querySelector("[name='id_evento']").value       = evento.id;
+        document.querySelector("[name='nombre']").value         = evento.nombre;
+
+        // Tipo de evento (+ campo “otro”)
+        const selectTipo = document.getElementById("tipo_evento");
+        const inputTipoOtro = document.getElementById("tipo_evento_otro");
+        if (selectTipo.querySelector(`option[value="${evento.tipo_evento}"]`)) {
+            selectTipo.value = evento.tipo_evento;
+            inputTipoOtro.style.display = "none";
+            inputTipoOtro.required = false;
+        } else {
+            selectTipo.value = "otro";
+            inputTipoOtro.style.display = "block";
+            inputTipoOtro.required = true;
+            inputTipoOtro.value = evento.tipo_evento;
+        }
+
         document.querySelector("[name='capacidad']").value = evento.capacidad;
-        document.querySelector("[name='fecha']").value = evento.fecha;
+        document.querySelector("[name='fecha']").value     = evento.fecha;
         document.querySelector("[name='hora_inicio']").value = evento.hora_inicio;
-        document.querySelector("[name='hora_fin']").value = evento.hora_fin;
-        document.querySelector("[name='campus']").value = evento.campus;
-        quillComentario.root.innerHTML = evento.comentario || "";
-        quillLineamientos.root.innerHTML = evento.lineamientos || "";
-        document.querySelector("[name='direccion']").value = evento.direccion;
-        document.querySelector("[name='expositor']").value = evento.expositor;
+        document.querySelector("[name='hora_fin']").value    = evento.hora_fin;
 
-        document.getElementById("formulario-evento").style.display = "block";
-        let selectLugar = document.getElementById("select-lugar");
-        let otroInput = document.getElementById("lugar_otro");
-
+        // Campus y Lugar
+        document.getElementById("select-campus").value = evento.campus;
+        const selectLugar = document.getElementById("select-lugar");
+        const inputLugarOtro = document.getElementById("lugar_otro");
         if (evento.campus === "Externo") {
             selectLugar.style.display = "none";
             selectLugar.required = false;
-            otroInput.style.display = "block";
-            otroInput.required = true;
-            otroInput.value = evento.lugar;
+            inputLugarOtro.style.display = "block";
+            inputLugarOtro.required = true;
+            inputLugarOtro.value = evento.lugar;
         } else {
+            inputLugarOtro.style.display = "none";
+            inputLugarOtro.required = false;
+            // recarga salones
             fetch(`actions/obtener_salones.php?campus=${evento.campus}`)
-                .then(response => response.json())
+                .then(r => r.json())
                 .then(data => {
                     selectLugar.innerHTML = data.map(salon =>
                         `<option value="${salon.id_salon}">${salon.id_salon} - Capacidad ${salon.capacidad}</option>`
-                    ).join('') + '<option value="otro">Otro</option>';
+                    ).join("") + '<option value="otro">Otro</option>';
                     selectLugar.style.display = "block";
                     selectLugar.required = true;
-                    otroInput.style.display = "none";
-                    otroInput.required = false;
-                    if (selectLugar.querySelector(`option[value='${evento.lugar}']`)) {
+                    if (selectLugar.querySelector(`option[value="${evento.lugar}"]`)) {
                         selectLugar.value = evento.lugar;
                     } else {
                         selectLugar.value = "otro";
-                        otroInput.style.display = "block";
-                        otroInput.required = true;
-                        otroInput.value = evento.lugar;
+                        inputLugarOtro.style.display = "block";
+                        inputLugarOtro.required = true;
+                        inputLugarOtro.value = evento.lugar;
                     }
-                })
-                .catch(error => console.error("Error al obtener salones:", error));
+                });
         }
-        document.getElementById("formulario-evento").scrollIntoView({ behavior: "smooth" });
-    }
 
+        // Quill editors
+        quillComentario.root.innerHTML   = evento.comentario   || "";
+        quillLineamientos.root.innerHTML = evento.lineamientos || "";
+
+        document.querySelector("[name='direccion']").value = evento.direccion;
+        document.querySelector("[name='expositor']").value = evento.expositor;
+
+        // 1) Limpiar preview y reset remove flag
+        const preview = document.getElementById("preview-imagen");
+        preview.innerHTML = "";
+        document.getElementById("remove_image").value = "0";
+
+        // 2) Si ya hay imagen en BD, la mostramos
+        if (evento.imagen_path) {
+            // Miniatura (o un enlace si prefieres)
+            const img = document.createElement("img");
+            img.src = evento.imagen_path;
+            img.alt = "Preview imagen";
+            img.style.maxWidth = "150px";
+            img.style.display = "block";
+            img.style.marginBottom = "8px";
+            preview.appendChild(img);
+
+            // Botón eliminar
+            const btnDel = document.createElement("button");
+            btnDel.type = "button";
+            btnDel.textContent = "🗑️ Eliminar imagen";
+            btnDel.onclick = () => {
+                document.getElementById("remove_image").value = "1";
+                preview.innerHTML = "<em>Imagen eliminada.</em>";
+                // limpiar input file para permitir re-subir si quiere
+                document.getElementById("imagen").value = "";
+            };
+            preview.appendChild(btnDel);
+
+        } else {
+            // Si no hay imagen, dejamos el mensaje por defecto
+            preview.innerHTML = "<em>No hay imagen asignada.</em>";
+        }
+
+        // 3) Si el usuario elige un nuevo archivo, marcamos remove_image=1 y mostramos su nombre
+        const fileInput = document.getElementById("imagen");
+        fileInput.value = "";
+        fileInput.onchange = () => {
+            if (fileInput.files.length) {
+                document.getElementById("remove_image").value = "1";
+                preview.innerHTML = `<em>Reemplazar con: ${fileInput.files[0].name}</em>`;
+            }
+        };
+
+        // 4) Mostrar el formulario…
+        document.getElementById("formulario-evento").style.display = "block";
+        formBox.style.display = "block";
+        formBox.scrollIntoView({ behavior: "smooth" });
+    }
     // Eliminar evento
     function eliminarEvento(id) {
         if (!confirm("¿Seguro que deseas eliminar este evento?")) {
@@ -550,5 +645,23 @@ $tipos_evento = $query_tipos->fetchAll(PDO::FETCH_ASSOC);
         background-color: #333; /* Fondo oscuro */
         color: white; /* Texto blanco */
     }
+
+    /* Hacer el texto de la previsualización blanco */
+    #preview-imagen {
+        color: #fff;
+    }
+    /* Si usas <em> para el texto de “No hay imagen…”, también blanco o un gris claro */
+    #preview-imagen em {
+        color: #ccc;
+    }
+    /* Y si quieres que los botones ahí dentro sean acordes */
+    #preview-imagen button {
+        background: transparent;
+        color: #fff;
+        border: 1px solid #fff;
+        padding: 4px 8px;
+        cursor: pointer;
+    }
 </style>
+
 

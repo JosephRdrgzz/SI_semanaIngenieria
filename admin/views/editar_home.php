@@ -3,7 +3,11 @@ session_start();
 require_once __DIR__ . '/../../config/conexion.php';
 
 // Verificar que el usuario es administrador
-if (!isset($_SESSION['id_usuario']) || $_SESSION['tipo_usuario'] !== 'admin') {
+// Sólo admin o super-admin
+if (
+    !isset($_SESSION['id_usuario']) ||
+    ! in_array($_SESSION['tipo_usuario'], ['admin','super'], true)
+) {
     header("Location: ../../index.php?view=login");
     exit();
 }
@@ -187,4 +191,5 @@ if (file_exists($archivoVista)) {
 
 </body>
 </html>
+
 

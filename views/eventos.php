@@ -38,8 +38,9 @@ if (!isset($_SESSION['id_usuario'])) {
 </div>
 
 <!-- Contenedor de eventos -->
-<div id="contenedor-eventos"></div>
-
+<div class="container">
+    <div id="contenedor-eventos"></div>
+</div>
 <!-- Carrito flotante de eventos seleccionados -->
 <div id="carrito-eventos" style="
     position: fixed;
@@ -67,3 +68,4 @@ if (!isset($_SESSION['id_usuario'])) {
 
 <!-- Carga el archivo JavaScript de eventos -->
 <script src="scripts/eventos.js"></script>
+
